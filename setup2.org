@@ -1,0 +1,27 @@
+REGEDIT4
+
+[HKEY_CURRENT_USER\Software\Classes\Directory]
+
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell]
+
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\atmm_4_datefolder]
+"MUIVerb"="日付フォルダに変更(&H)"
+"Description"="日付付きフォルダに変更する。"
+"AppliesTo"="NOT system.filename:~<\"20\""
+
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\atmm_4_datefolder\command]
+@="\"{program}\" -d \"%V\""
+
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\atmm_8_tagging]
+"MUIVerb"="タグ追加(&T)"
+"Description"="フォルダ名にタグを追加する。"
+
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\atmm_8_tagging\command]
+@="\"{program}\" -t \"%V\""
+
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\atmm_9_comment]
+"MUIVerb"="コメント追加(&A)"
+"Description"="フォルダ名にコメントを追加する。"
+
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\atmm_9_comment\command]
+@="\"{program}\" -c \"%V\""

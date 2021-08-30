@@ -1,0 +1,28 @@
+REGEDIT4
+
+[HKEY_CURRENT_USER\Software\Classes\Directory]
+
+[HKEY_CURRENT_USER\Software\Classes\Directory\Background]
+
+[HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell]
+
+[HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\atmm_4_datefolder]
+"MUIVerb"="日付フォルダ作成(&H)"
+"Description"="日付付きフォルダを作成する。"
+
+[HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\atmm_4_datefolder\command]
+@="\"{program}\" -d"
+
+[HKEY_CURRENT_USER\Software\Classes\.tmm\ShellNew]
+"MenuText"="日付フォルダ"
+"ItemName"="@%SystemRoot%\system32\notepad.exe,-470"
+"Command"="\"{program}\" -d"
+
+[HKEY_CURRENT_USER\Software\Classes\atmm]
+@="Advainced T's Manipulator Module"
+
+[HKEY_CURRENT_USER\Software\Classes\atmm\tag]
+@="abc"
+"a"="【参考】"
+"b"="【編集中】"
+"c"="【破棄】"

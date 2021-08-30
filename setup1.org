@@ -1,0 +1,67 @@
+REGEDIT4
+
+[HKEY_CURRENT_USER\Software\Classes\*]
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell]
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_3_restore]
+"MUIVerb"="バックアップから戻す(&B)"
+"Description"="OLDフォルダから戻す。"
+"AppliesTo"="folder:~>\\_old"
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_3_restore\command]
+@="\"{program}\" -r \"%V\""
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_4_snapshot]
+"MUIVerb"="スナップショット(&H)"
+"Description"="日付を付けたファイルを作成します。"
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_4_snapshot\command]
+@="\"{program}\" -s \"%V\""
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_6_backup]
+"MUIVerb"="バックアップへ移動(&B)"
+"Description"="OLDフォルダに日付を付けて移動します。"
+"AppliesTo"="NOT folder:~=\\_old"
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_6_backup\command]
+@="\"{program}\" -b \"%V\""
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_7_checkout1]
+"MUIVerb"="【編集】チェックアウト(&O)"
+"Description"="ディスクトップにチェックアウトします。"
+"AppliesTo"="folder:~=\\work\\ AND NOT file:=<【"
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_7_checkout1\command]
+@="\"{program}\" -o1p \"%V\""
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_7_checkout2]
+"MUIVerb"="【参考】チェックアウト(&O)"
+"Description"="ディスクトップにチェックアウトします。"
+"AppliesTo"="folder:~=\\work\\ AND NOT file:=<【"
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_7_checkout2\command]
+@="\"{program}\" -o2f \"%V\""
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_7_checkin]
+"MUIVerb"="チェックイン(&I)"
+"Description"="チェックインします。"
+"AppliesTo"="folder:~=\\デスクトップ\\"
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_7_checkin\command]
+@="\"{program}\" -i \"%V\""
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_8_tagging]
+"MUIVerb"="タグ編集(&T)"
+"Description"="ファイル名タグを編集する。"
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_8_tagging\command]
+@="\"{program}\" -t \"%V\""
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_9_comment]
+"MUIVerb"="コメント(&A)"
+"Description"="ファイル名にコメントを追加・編集する。"
+"Extended"=""
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_9_comment\command]
+@="\"{program}\" -c \"%V\""
