@@ -1,4 +1,20 @@
 /**
+ * Advanced T's Manipulater Module
+ *
+ * Command line options:
+ *    -s  snapshot
+ *    -d  date-indexed
+ *    -b  backup/restore
+ *    -r  restore
+ *    -o  checkout
+ *    -i  checkin
+ *    -t  tagging
+ *    -c  add comment
+ *    -f  folder open
+ *    -p  program
+ *    -z  archive
+ *    -v  verbose
+ *
  * 日付フォルダ管理
  *   1. フォルダを指定した場合
  *      フォルダの先頭に8桁の日付をつける。
@@ -306,7 +322,8 @@ namespace Tmm
                 CommentMode,
                 FolderMode,
                 OpenMode,
-                ZipMode
+                ZipMode,
+                VerboseMode
             };
             List<Mode> _mode = new List<Mode>();
 
@@ -341,6 +358,7 @@ namespace Tmm
             /// <returns></returns>
             public FileInfo ExecuteFile(FileInfo src, string index)
             {
+                Verbose("ExecuteFile:\n  src  ="+src+"\n  index="+index);
                 ItemManager im = new ItemManager();
                 //action snapshot/date indexed
                 if (HasMode(Mode.SnapshotMode) && (src != null))
@@ -401,6 +419,7 @@ namespace Tmm
             /// <returns></returns>
             public DirectoryInfo ExecuteDirectory(DirectoryInfo src, string index)
             {
+                Verbose("ExecuteDirectory:\n  src  ="+src+"\n  index="+index);
                 ItemManager im = new ItemManager();
                 //action snapshot/date-indexed
                 if (HasMode(Mode.IndexedMode) && (src != null))
@@ -436,6 +455,7 @@ namespace Tmm
             /// <param name="index"></param>
             public void ExecuteBackground(DirectoryInfo dst, string index)
             {
+                Verbose("ExecuteBackground:\n  src  ="+dst+"\n  index="+index);
                 if (HasMode(ItemJob.Mode.IndexedMode))
                 {
                     MessageBox.Show("ExecuteBackground");
@@ -566,6 +586,17 @@ namespace Tmm
                 SetMode(Mode.IndexedMode);
             }
 
+            /// <summary>
+            /// verbose
+            /// </summary>
+            public void Verbose(string s)
+            {
+                if (HasMode(Mode.VerboseMode))
+                {
+                    MessageBox.Show(s);
+                }
+            }
+
             /////////////////////////////////////////////////////////////////////
             // options
 
@@ -620,6 +651,9 @@ namespace Tmm
                         case 'z':   //archive
                             ToggleMode(Mode.ZipMode);
                             break;
+                        case 'v':   //verbose
+                            ToggleMode(Mode.VerboseMode);
+                            break;
                         case '1':   //level
                         case '2':   //level
                         case '3':   //level
@@ -646,21 +680,9 @@ namespace Tmm
         /////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        ///メイン処理
-        ///   コマンドライン引数[0]は機能セレクタ：
-        ///     -s  snapshot
-        ///     -d  date-indexed
-        ///     -b  backup/restore
-        ///     -r  restore
-        ///     -o  checkout
-        ///     -i  checkin
-        ///     -t  tagging
-        ///     -c  add comment
-        ///     -f  folder open
-        ///     -p  program
-        ///     -z  archive
+        ///main process
         /// </summary>
-        /// <param name="args">コマンドライン引数</param>
+        /// <param name="args">file/folder path or options</param>
         public static void Main(string[] args)
         {
             try
@@ -695,7 +717,7 @@ namespace Tmm
                         string index = ItemManager.DateTimeFormat(ticks);
                         if (null == job.ExecuteDirectory(di, index))
                         {
-                            //MessageBox.Show("stop operation. target directory.\n" + di.Name);
+                            job.Verbose("stop operation. target directory.\n" + di.Name);
                             return;
                         }
                         no_target = false;
@@ -709,7 +731,7 @@ namespace Tmm
                         src = job.ExecuteFile(fi, index);
                         if (null == src)
                         {
-                            //MessageBox.Show("stop operation. target file.\n" + fi.Name);
+                            job.Verbose("stop operation. target file.\n" + fi.Name);
                             return;
                         }
                         no_target = false;
