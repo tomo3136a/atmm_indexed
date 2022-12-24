@@ -1,42 +1,37 @@
 #installer for indexed.exe
 #
 $AppName = "indexed.exe"
-$OutputPath = "../bin"
+$OutputPath = "c:/opt/bin"
 
-$Path = "src/indexed.cs", "src/im.cs", "src/im_index.cs", "src/im_backup.cs", `
-  "src/im_checkout.cs", "src/im_comment.cs"
+$Path = "indexed.cs", "im.cs", "im_index.cs", "im_backup.cs", `
+  "im_checkout.cs", "im_comment.cs"
 $ReferencedAssemblies = "System.Drawing", "System.Windows.Forms"
 $orgs = "setup1.org", "setup2.org", "setup3.org"
-
-if (-not (Test-Path "$OutputPath")) {
-  New-Item "$OutputPath" -ItemType Directory
-}
-$OutputPath = Join-Path (Resolve-Path "$OutputPath") "$AppName"
 
 if ( $Args[0] -ne "-u" ) {
   Write-Host "install start." -ForegroundColor Yellow
 
-  $OutputDir = Resolve-Path (Join-Path "$OutputPath" "..")
-  if (-not (Test-Path "$OutputDir")) {
-    New-Item "$OutputDir" -ItemType Directory
+  if (-not (Test-Path $OutputPath)) {
+    New-Item -Path $OutputPath -ItemType Directory | Out-Null
     Write-Output "make directory."
   }
+  $OutputAssembly = Join-Path (Resolve-Path -Path $OutputPath) $AppName
 
-  Write-Output "build appication: $AppName"
+  Write-Output "build program:  $AppName"
   Write-Output "    Path:       $Path"
-  Write-Output "    OutputPath: $OutputPath"
+  Write-Output "    Output:     $OutputAssembly"
   Write-Output "    References: $ReferencedAssemblies"
   Add-Type -OutputType WindowsApplication `
-    -Path $Path -OutputAssembly $OutputPath `
+    -Path $Path -OutputAssembly $OutputAssembly `
     -ReferencedAssemblies $ReferencedAssemblies
   Write-Output "build completed."
 
   foreach ($org in $orgs) {
     $reg = $org -replace ".org$", ".reg"
-    $bin = "$OutPutPath" -replace "\\", "\\"
+    $bin = $OutPutPath -replace "\\", "\\"
     Get-Content $org | ForEach-Object { $_ -replace "{program}", $bin } > "$reg"
     reg import $reg
-    Remove-Item $reg
+    Remove-Item $reg | Out-Null
   }
 
   Write-Host "install completed." -ForegroundColor Yellow
@@ -60,6 +55,9 @@ reg delete HKCU\Software\Classes\Directory\shell\atmm_9_comment /f
 reg delete HKCU\Software\Classes\Directory\Background\shell\atmm_4_datefolder /f
 reg delete HKCU\Software\Classes\.tmm /f
 reg delete HKCU\Software\Classes\atmm /f
-if (Test-Path $OutputPath) { Remove-Item $OutputPath }
+if (Test-Path $OutputPath) {
+  $OutputAssembly = Join-Path (Resolve-Path -Path $OutputPath) $AppName
+  if (Test-Path $OutputAssembly) { Remove-Item -Path $OutputAssembly | Out-Null }
+}
 Write-Host "uninstall completed." -ForegroundColor Yellow
 $host.UI.RawUI.ReadKey() | Out-Null

@@ -11,12 +11,15 @@ REGEDIT4
 "Description"="日付付きフォルダを作成する。"
 
 [HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\atmm_4_datefolder\command]
-@="\"{program}\" -d"
+@="\"{program}\" -dv"
+
+[HKEY_CURRENT_USER\Software\Classes\.tmm]
+@="atmm"
 
 [HKEY_CURRENT_USER\Software\Classes\.tmm\ShellNew]
 "MenuText"="日付フォルダ"
 "ItemName"="@%SystemRoot%\system32\notepad.exe,-470"
-"Command"="\"{program}\" -d"
+"Command"="\"{program}\" -dv"
 
 [HKEY_CURRENT_USER\Software\Classes\atmm]
 @="Advainced T's Manipulator Module"
