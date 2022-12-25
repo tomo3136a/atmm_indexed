@@ -236,7 +236,6 @@ namespace Tmm
             _name = "";
             _note = "";
             _ext = "";
-            _mode = 0;
             _size = size;
             _last = last;
             
@@ -250,6 +249,7 @@ namespace Tmm
                 Match m2 = re_id.Match(_name);
                 if (m2.Success)
                 {
+                    _mode = 0;
                     _index = m2.Groups["idx"].Value;
                     _n_rev = ToRevisionNumber(m2.Groups["rev"].Value);
                     _note = _name.Substring(m2.Index + m2.Length);

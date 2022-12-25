@@ -361,35 +361,44 @@ namespace Tmm
                 Verbose("ExecuteFile:\n  src  ="+src+"\n  index="+index);
                 ItemManager im = new ItemManager();
                 //action snapshot/date indexed
-                if (HasMode(Mode.SnapshotMode) && (src != null))
+                if (HasMode(Mode.IndexedMode))
+                {
+                    im.SetMode(1);
+                    src = im.Indexed(src, index, 0, false);
+                }
+                else if (HasMode(Mode.SnapshotMode))
                 {
                     src = im.Indexed(src, index, 0, false);
                 }
+                if (null == src) return null;
                 //action backup/restore
-                if (HasMode(Mode.BackupMode) && (src != null))
+                if (HasMode(Mode.BackupMode))
                 {
                     src = im.BackupTo(src);
                 }
-                else if (HasMode(Mode.RestoreMode) && (src != null))
+                else if (HasMode(Mode.RestoreMode))
                 {
                     src = im.RestoreFrom(src, RestoreProc);
                 }
+                if (null == src) return null;
                 //action check-out/check-in
-                if (HasMode(Mode.CheckOutMode) && (src != null))
+                if (HasMode(Mode.CheckOutMode))
                 {
                     src = im.CheckOutFrom(src, _level, RestoreProc);
                 }
-                else if (HasMode(Mode.CheckInMode) && (src != null))
+                else if (HasMode(Mode.CheckInMode))
                 {
                     src = im.CheckInTo(src, RestoreProc);
                 }
+                if (null == src) return null;
                 //action commment
-                if (HasMode(Mode.CommentMode) && (src != null))
+                if (HasMode(Mode.CommentMode))
                 {
                     src = im.Comment(src, CommentProc);
                 }
+                if (null == src) return null;
                 //action tagging
-                if (HasMode(Mode.TaggingMode) && (src != null))
+                if (HasMode(Mode.TaggingMode))
                 {
                     src = im.Tagging(src, TaggingProc);
                 }
@@ -422,26 +431,34 @@ namespace Tmm
                 Verbose("ExecuteDirectory:\n  src  ="+src+"\n  index="+index);
                 ItemManager im = new ItemManager();
                 //action snapshot/date-indexed
-                if (HasMode(Mode.IndexedMode) && (src != null))
+                if (HasMode(Mode.IndexedMode))
+                {
+                    im.SetMode(1);
+                    src = im.Indexed(src, index, 0);
+                }
+                else if (HasMode(Mode.SnapshotMode))
                 {
                     src = im.Indexed(src, index, 0);
                 }
+                if (null == src) return null;
                 //action backup/restore
-                if (HasMode(Mode.BackupMode) && (src != null))
+                if (HasMode(Mode.BackupMode))
                 {
                     src = im.BackupTo(src);
                 }
-                else if (HasMode(Mode.RestoreMode) && (src != null))
+                else if (HasMode(Mode.RestoreMode))
                 {
                     src = im.RestoreFrom(src, RestoreProc);
                 }
+                if (null == src) return null;
                 //action commment
-                if (HasMode(Mode.CommentMode) && (src != null))
+                if (HasMode(Mode.CommentMode))
                 {
                     src = im.Comment(src, CommentProc);
                 }
+                if (null == src) return null;
                 //action tagging
-                if (HasMode(Mode.TaggingMode) && (src != null))
+                if (HasMode(Mode.TaggingMode))
                 {
                     src = im.Tagging(src, TaggingProc);
                 }
