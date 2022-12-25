@@ -6,11 +6,11 @@ REGEDIT4
 
 [HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell]
 
-[HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\atmm_4_datefolder]
+[HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\at_1_datefolder]
 "MUIVerb"="日付フォルダ作成(&H)"
 "Description"="日付付きフォルダを作成する。"
 
-[HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\atmm_4_datefolder\command]
+[HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\at_1_datefolder\command]
 @="\"{program}\" -dv"
 
 [HKEY_CURRENT_USER\Software\Classes\.tmm]

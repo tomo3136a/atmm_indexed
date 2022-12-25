@@ -4,51 +4,54 @@ REGEDIT4
 
 [HKEY_CURRENT_USER\Software\Classes\*\shell]
 
-[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_3_restore]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\at_2_snapshot]
+"MUIVerb"="スナップショット(&H)"
+"Description"="日付を付けたファイルを作成します。"
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\at_2_snapshot\command]
+@="\"{program}\" -s \"%V\""
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\at_3_restore]
 "MUIVerb"="バックアップから戻す(&B)"
 "Description"="OLDフォルダから戻す。"
 "AppliesTo"="folder:~>\\_old"
 
-[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_3_restore\command]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\at_3_restore\command]
 @="\"{program}\" -r \"%V\""
 
-[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_4_snapshot]
-"MUIVerb"="スナップショット(&H)"
-"Description"="日付を付けたファイルを作成します。"
-
-[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_4_snapshot\command]
-@="\"{program}\" -s \"%V\""
-
-[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_6_backup]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\at_4_backup]
 "MUIVerb"="バックアップへ移動(&B)"
 "Description"="OLDフォルダに日付を付けて移動します。"
 "AppliesTo"="NOT folder:~=\\_old"
 
-[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_6_backup\command]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\at_4_backup\command]
 @="\"{program}\" -b \"%V\""
 
-[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_7_checkout1]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\at_5_checkout1]
 "MUIVerb"="【編集】チェックアウト(&O)"
 "Description"="ディスクトップにチェックアウトします。"
 "AppliesTo"="folder:~=\\work\\ AND NOT file:=<【"
+"Extended"=""
 
-[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_7_checkout1\command]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\at_5_checkout1\command]
 @="\"{program}\" -o1p \"%V\""
 
-[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_7_checkout2]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\at_6_checkout2]
 "MUIVerb"="【参考】チェックアウト(&O)"
 "Description"="ディスクトップにチェックアウトします。"
 "AppliesTo"="folder:~=\\work\\ AND NOT file:=<【"
+"Extended"=""
 
-[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_7_checkout2\command]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\at_6_checkout2\command]
 @="\"{program}\" -o2f \"%V\""
 
-[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_7_checkin]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\at_7_checkin]
 "MUIVerb"="チェックイン(&I)"
 "Description"="チェックインします。"
 "AppliesTo"="folder:~=\\デスクトップ\\"
+"Extended"=""
 
-[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_7_checkin\command]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\at_7_checkin\command]
 @="\"{program}\" -i \"%V\""
 
 [HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_8_tagging]

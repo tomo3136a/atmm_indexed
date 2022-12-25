@@ -41,18 +41,19 @@ if ( $Args[0] -ne "-u" ) {
 
 #uninstall
 Write-Host "uninstall start." -ForegroundColor Yellow
-reg delete HKCU\Software\Classes\*\shell\atmm_3_restore /f
-reg delete HKCU\Software\Classes\*\shell\atmm_4_snapshot /f
-reg delete HKCU\Software\Classes\*\shell\atmm_6_backup /f
-reg delete HKCU\Software\Classes\*\shell\atmm_7_checkout1 /f
-reg delete HKCU\Software\Classes\*\shell\atmm_7_checkout2 /f
-reg delete HKCU\Software\Classes\*\shell\atmm_7_checkin /f
-reg delete HKCU\Software\Classes\*\shell\atmm_8_tagging /f
-reg delete HKCU\Software\Classes\*\shell\atmm_9_comment /f
-reg delete HKCU\Software\Classes\Directory\shell\atmm_4_datefolder /f
-reg delete HKCU\Software\Classes\Directory\shell\atmm_8_tagging /f
-reg delete HKCU\Software\Classes\Directory\shell\atmm_9_comment /f
-reg delete HKCU\Software\Classes\Directory\Background\shell\atmm_4_datefolder /f
+reg delete HKCU\Software\Classes\*\shell\at_2_snapshot /f
+reg delete HKCU\Software\Classes\*\shell\at_3_restore /f
+reg delete HKCU\Software\Classes\*\shell\at_4_backup /f
+reg delete HKCU\Software\Classes\*\shell\at_5_checkout1 /f
+reg delete HKCU\Software\Classes\*\shell\at_6_checkout2 /f
+reg delete HKCU\Software\Classes\*\shell\at_7_checkin /f
+reg delete HKCU\Software\Classes\*\shell\at_8_tagging /f
+reg delete HKCU\Software\Classes\*\shell\at_9_comment /f
+reg delete HKCU\Software\Classes\Directory\shell\at_1_datefolder /f
+reg delete HKCU\Software\Classes\Directory\shell\at_2_snapshot /f
+reg delete HKCU\Software\Classes\Directory\shell\at_8_tagging /f
+reg delete HKCU\Software\Classes\Directory\shell\at_9_comment /f
+reg delete HKCU\Software\Classes\Directory\Background\shell\at_1_datefolder /f
 reg delete HKCU\Software\Classes\.tmm /f
 reg delete HKCU\Software\Classes\atmm /f
 if (Test-Path $OutputPath) {
