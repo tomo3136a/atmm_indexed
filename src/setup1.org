@@ -54,17 +54,17 @@ REGEDIT4
 [HKEY_CURRENT_USER\Software\Classes\*\shell\at_7_checkin\command]
 @="\"{program}\" -i \"%V\""
 
-[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_8_tagging]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\at_8_tagging]
 "MUIVerb"="タグ編集(&T)"
 "Description"="ファイル名タグを編集する。"
 
-[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_8_tagging\command]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\at_8_tagging\command]
 @="\"{program}\" -t \"%V\""
 
-[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_9_comment]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\at_9_comment]
 "MUIVerb"="コメント(&A)"
 "Description"="ファイル名にコメントを追加・編集する。"
 "Extended"=""
 
-[HKEY_CURRENT_USER\Software\Classes\*\shell\atmm_9_comment\command]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\at_9_comment\command]
 @="\"{program}\" -c \"%V\""
