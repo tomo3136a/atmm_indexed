@@ -240,29 +240,25 @@ namespace Tmm
             _last = last;
             
             Match m1 = re_name.Match(name);
-            if (m1.Success)
-            {
-                _tag = m1.Groups["tag"].Value;
-                _name = m1.Groups["name"].Value;
-                _ext = m1.Groups["ext"].Value;
+            if (! m1.Success) return false;
+            _tag = m1.Groups["tag"].Value;
+            _name = m1.Groups["name"].Value;
+            _ext = m1.Groups["ext"].Value;
 
-                Match m2 = re_id.Match(_name);
-                if (m2.Success)
-                {
-                    _mode = 0;
-                    _index = m2.Groups["idx"].Value;
-                    _n_rev = ToRevisionNumber(m2.Groups["rev"].Value);
-                    _note = _name.Substring(m2.Index + m2.Length);
-                    _name = _name.Substring(0, m2.Index);
-                    if (m2.Index == 0)
-                    {
-                        _mode = 1;
-                        _note = "";
-                        _name = _note;
-                    }
-                }
+            Match m2 = re_id.Match(_name);
+            if (! m2.Success) return true;
+            _mode = 0;
+            _index = m2.Groups["idx"].Value;
+            _n_rev = ToRevisionNumber(m2.Groups["rev"].Value);
+            _note = _name.Substring(m2.Index + m2.Length);
+            _name = _name.Substring(0, m2.Index);
+            if (m2.Index == 0)
+            {
+                _mode = 1;
+                _name = _note;
+                _note = "";
             }
-            return m1.Success;
+            return true;
         }
 
         /// <summary>
