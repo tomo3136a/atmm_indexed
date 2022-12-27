@@ -374,7 +374,7 @@ namespace Tmm
                 //action backup/restore
                 if (HasMode(Mode.BackupMode))
                 {
-                    src = im.BackupTo(src);
+                    src = im.BackupTo(src, RestoreProc);
                 }
                 else if (HasMode(Mode.RestoreMode))
                 {
@@ -444,7 +444,7 @@ namespace Tmm
                 //action backup/restore
                 if (HasMode(Mode.BackupMode))
                 {
-                    src = im.BackupTo(src);
+                    src = im.BackupTo(src, RestoreProc);
                 }
                 else if (HasMode(Mode.RestoreMode))
                 {
