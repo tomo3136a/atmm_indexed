@@ -1,9 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Drawing;
-using System.Windows.Forms;
 
 namespace Tmm
 {
@@ -102,6 +98,7 @@ namespace Tmm
                 dst = new FileInfo(s);
             }
             src.CopyTo(s);
+            dst = new FileInfo(s);
             return dst;
         }
 
@@ -126,6 +123,7 @@ namespace Tmm
                 dst = new DirectoryInfo(s);
             }
             CopyAll(src, dst);
+            dst = new DirectoryInfo(s);
             return dst;
         }
     }
