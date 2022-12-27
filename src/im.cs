@@ -31,7 +31,7 @@ namespace Tmm
         /// <summary>
         /// filename pattern
         /// </summary>
-        const string ptn_name = @"^(?<tag>【[^】]*】)?(?<name>[^.]+)(?<ext>[.].+)?$";
+        const string ptn_name = @"^(?<tag>\u3010[^\u3011]*\u3011)?(?<name>[^.]+)(?<ext>[.].+)?$";
         static Regex re_name = new Regex(ptn_name,
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
@@ -222,6 +222,15 @@ namespace Tmm
         string _ext;
         long _last;
         long _size;
+
+        public void FileNameShow()
+        {
+            var s1 = "mode="+_mode+"\rindex="+_index+" "+_n_rev;
+            var s2 = "name="+_name+"\rext="+_ext;
+            var s3 = "tag="+_tag+"\rnote="+_note;
+            var s4 = "last="+_last+"\rsize="+_size;
+            MessageBox.Show(s1+"\r"+s2+"\r"+s3+"\r"+s4, "FileName");
+        }
 
         /// <summary>
         /// set sorce information
