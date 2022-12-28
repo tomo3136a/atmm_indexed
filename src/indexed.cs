@@ -6,6 +6,7 @@
  *    -d  date-indexed
  *    -b  backup/restore
  *    -r  restore
+ *    -h  hashfile
  *    -o  checkout
  *    -i  checkin
  *    -t  tagging
@@ -83,6 +84,7 @@ namespace Tmm
                 textLabel.Top = 10;
                 textLabel.Text = text;
                 textLabel.AutoSize = true;
+                textLabel.MaximumSize = new Size(width - 20, 0);
 
                 modeLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
                 modeLabel.Text = "";
@@ -258,6 +260,35 @@ namespace Tmm
         /////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// file rename input dialog
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static string RenameDialog(string s)
+        {
+            while (File.Exists(s) || Directory.Exists(s))
+            {
+                var p = Path.GetDirectoryName(s);
+                var n = Path.GetFileName(s);
+                var e = Path.GetExtension(s);
+                n = n.Substring(0, n.Length - e.Length);
+                var title = "indexed";
+                var msg = "フォルダ、またはファイルが存在します。";
+                msg += "別名で保存してください。\r\n";
+                msg += n + e + "  -> *" + e;
+                var dlg = new InputDialog(msg, title);
+                dlg.Value = n; //.Substring(0, n.Length - e.Length);
+                DialogResult res = dlg.ShowDialog();
+                if (res != DialogResult.OK)
+                {
+                    return null;
+                }
+                s = Path.Combine(p, dlg.Value + e);
+            }
+            return s;
+        }
+
+        /// <summary>
         /// file save input dialog
         /// </summary>
         /// <param name="s"></param>
@@ -316,6 +347,7 @@ namespace Tmm
                 IndexedMode,
                 BackupMode,
                 RestoreMode,
+                HashFileMode,
                 CheckOutMode,
                 CheckInMode,
                 TaggingMode,
@@ -374,21 +406,27 @@ namespace Tmm
                 //action backup/restore
                 if (HasMode(Mode.BackupMode))
                 {
-                    src = im.BackupTo(src, RestoreProc);
+                    src = im.BackupTo(src, RenameProc);
                 }
                 else if (HasMode(Mode.RestoreMode))
                 {
-                    src = im.RestoreFrom(src, RestoreProc);
+                    src = im.RestoreFrom(src, RenameProc);
+                }
+                if (null == src) return null;
+                //action hashfile
+                if (HasMode(Mode.HashFileMode))
+                {
+                    src = im.TestHashFile(src);
                 }
                 if (null == src) return null;
                 //action check-out/check-in
                 if (HasMode(Mode.CheckOutMode))
                 {
-                    src = im.CheckOutFrom(src, _level, RestoreProc);
+                    src = im.CheckOutFrom(src, _level, RenameProc);
                 }
                 else if (HasMode(Mode.CheckInMode))
                 {
-                    src = im.CheckInTo(src, RestoreProc);
+                    src = im.CheckInTo(src, RenameProc);
                 }
                 if (null == src) return null;
                 //action commment
@@ -405,9 +443,19 @@ namespace Tmm
                 return src;
             }
 
-            public static string RestoreProc(ItemManager im, string name)
+            public static string RenameProc(ItemManager im, string name)
             {
-                return SaveDialog(name);
+                var msg = "ファイル、またはフォルダが存在します。上書きしますか？";
+                var res = MessageBox.Show(msg, "indexed", MessageBoxButtons.YesNoCancel);
+                if (res == DialogResult.Yes)
+                {
+                    return "*";
+                }
+                if (res == DialogResult.No)
+                {
+                    return RenameDialog(name);
+                }
+                return null;
             }
 
             public static string CommentProc(ItemManager im, string comment)
@@ -444,11 +492,11 @@ namespace Tmm
                 //action backup/restore
                 if (HasMode(Mode.BackupMode))
                 {
-                    src = im.BackupTo(src, RestoreProc);
+                    src = im.BackupTo(src, RenameProc);
                 }
                 else if (HasMode(Mode.RestoreMode))
                 {
-                    src = im.RestoreFrom(src, RestoreProc);
+                    src = im.RestoreFrom(src, RenameProc);
                 }
                 if (null == src) return null;
                 //action commment
@@ -522,6 +570,12 @@ namespace Tmm
                             System.Diagnostics.Process.Start(p);
                         }
                     }
+                }
+                //action hashfile
+                if (HasMode(Mode.HashFileMode))
+                {
+                    ItemManager im = new ItemManager(1, index, 0);
+                    im.CreateHashFile(dst);
                 }
             }
 
@@ -652,6 +706,9 @@ namespace Tmm
                             break;
                         case 'r':   //restore
                             ToggleMode(Mode.RestoreMode);
+                            break;
+                        case 'h':   //hashfile
+                            ToggleMode(Mode.HashFileMode);
                             break;
                         case 't':   //tagging
                             ToggleMode(Mode.TaggingMode);

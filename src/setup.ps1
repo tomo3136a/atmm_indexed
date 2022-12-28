@@ -3,8 +3,7 @@
 $AppName = "indexed.exe"
 $OutputPath = "c:/opt/bin"
 
-$Path = "indexed.cs", "im.cs", "im_index.cs", "im_backup.cs", `
-  "im_checkout.cs", "im_comment.cs"
+$Path = "*indexed.cs", "im*.cs"
 $ReferencedAssemblies = "System.Drawing", "System.Windows.Forms"
 $orgs = "setup1.org", "setup2.org", "setup3.org"
 
@@ -56,6 +55,14 @@ reg delete HKCU\Software\Classes\Directory\shell\at_9_comment /f
 reg delete HKCU\Software\Classes\Directory\Background\shell\at_1_datefolder /f
 reg delete HKCU\Software\Classes\.tmm /f
 reg delete HKCU\Software\Classes\atmm /f
+reg delete HKCU\Software\Classes\.sum /f
+reg delete HKCU\Software\Classes\.md5 /f
+reg delete HKCU\Software\Classes\.sha1 /f
+reg delete HKCU\Software\Classes\.sha256 /f
+reg delete HKCU\Software\Classes\.sha384 /f
+reg delete HKCU\Software\Classes\.sha512 /f
+reg delete HKCU\Software\Classes\hashfile /f
+
 if (Test-Path $OutputPath) {
   $OutputAssembly = Join-Path (Resolve-Path -Path $OutputPath) $AppName
   if (Test-Path $OutputAssembly) { Remove-Item -Path $OutputAssembly | Out-Null }
