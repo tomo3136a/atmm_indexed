@@ -11,14 +11,14 @@ REGEDIT4
 "Description"="日付付きフォルダを作成する。"
 
 [HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\at_1_datefolder\command]
-@="\"{program}\" -dv"
+@="\"{program}\" -d"
 
 [HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\at_2_hashfile]
 "MUIVerb"="ハッシュファイル作成(&H)"
 "Description"="ハッシュファイルを作成する。"
 
 [HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\at_2_hashfile\command]
-@="\"{program}\" -hv"
+@="\"{program}\" -h"
 
 [HKEY_CURRENT_USER\Software\Classes\.sum]
 @="hashfile"
@@ -30,6 +30,9 @@ REGEDIT4
 @="hashfile"
 
 [HKEY_CURRENT_USER\Software\Classes\.sha256]
+@="hashfile"
+
+[HKEY_CURRENT_USER\Software\Classes\.sha384]
 @="hashfile"
 
 [HKEY_CURRENT_USER\Software\Classes\.sha512]
@@ -46,20 +49,3 @@ REGEDIT4
 
 [HKEY_CURRENT_USER\Software\Classes\hashfile\shell\test\command]
 @="\"{program}\" -h \"%V\""
-
-[HKEY_CURRENT_USER\Software\Classes\.tmm]
-@="atmm"
-
-[HKEY_CURRENT_USER\Software\Classes\.tmm\ShellNew]
-"MenuText"="日付フォルダ"
-"ItemName"="@%SystemRoot%\system32\notepad.exe,-470"
-"Command"="\"{program}\" -dv"
-
-[HKEY_CURRENT_USER\Software\Classes\atmm]
-@="Advainced T's Manipulator Module"
-
-[HKEY_CURRENT_USER\Software\Classes\atmm\tag]
-@="abc"
-"a"="【参考】"
-"b"="【編集中】"
-"c"="【破棄】"

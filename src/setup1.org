@@ -27,33 +27,6 @@ REGEDIT4
 [HKEY_CURRENT_USER\Software\Classes\*\shell\at_4_backup\command]
 @="\"{program}\" -b \"%V\""
 
-[HKEY_CURRENT_USER\Software\Classes\*\shell\at_5_checkout1]
-"MUIVerb"="【編集】チェックアウト(&O)"
-"Description"="ディスクトップにチェックアウトします。"
-"AppliesTo"="folder:~=\\work\\ AND NOT file:=<【"
-"Extended"=""
-
-[HKEY_CURRENT_USER\Software\Classes\*\shell\at_5_checkout1\command]
-@="\"{program}\" -o1p \"%V\""
-
-[HKEY_CURRENT_USER\Software\Classes\*\shell\at_6_checkout2]
-"MUIVerb"="【参考】チェックアウト(&O)"
-"Description"="ディスクトップにチェックアウトします。"
-"AppliesTo"="folder:~=\\work\\ AND NOT file:=<【"
-"Extended"=""
-
-[HKEY_CURRENT_USER\Software\Classes\*\shell\at_6_checkout2\command]
-@="\"{program}\" -o2f \"%V\""
-
-[HKEY_CURRENT_USER\Software\Classes\*\shell\at_7_checkin]
-"MUIVerb"="チェックイン(&I)"
-"Description"="チェックインします。"
-"AppliesTo"="folder:~=\\デスクトップ\\"
-"Extended"=""
-
-[HKEY_CURRENT_USER\Software\Classes\*\shell\at_7_checkin\command]
-@="\"{program}\" -i \"%V\""
-
 [HKEY_CURRENT_USER\Software\Classes\*\shell\at_8_tagging]
 "MUIVerb"="タグ編集(&T)"
 "Description"="ファイル名タグを編集する。"

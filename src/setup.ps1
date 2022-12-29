@@ -43,9 +43,9 @@ Write-Host "uninstall start." -ForegroundColor Yellow
 reg delete HKCU\Software\Classes\*\shell\at_2_snapshot /f
 reg delete HKCU\Software\Classes\*\shell\at_3_restore /f
 reg delete HKCU\Software\Classes\*\shell\at_4_backup /f
-reg delete HKCU\Software\Classes\*\shell\at_5_checkout1 /f
-reg delete HKCU\Software\Classes\*\shell\at_6_checkout2 /f
-reg delete HKCU\Software\Classes\*\shell\at_7_checkin /f
+# reg delete HKCU\Software\Classes\*\shell\at_5_checkout1 /f
+# reg delete HKCU\Software\Classes\*\shell\at_6_checkout2 /f
+# reg delete HKCU\Software\Classes\*\shell\at_7_checkin /f
 reg delete HKCU\Software\Classes\*\shell\at_8_tagging /f
 reg delete HKCU\Software\Classes\*\shell\at_9_comment /f
 reg delete HKCU\Software\Classes\Directory\shell\at_1_datefolder /f
@@ -53,8 +53,9 @@ reg delete HKCU\Software\Classes\Directory\shell\at_2_snapshot /f
 reg delete HKCU\Software\Classes\Directory\shell\at_8_tagging /f
 reg delete HKCU\Software\Classes\Directory\shell\at_9_comment /f
 reg delete HKCU\Software\Classes\Directory\Background\shell\at_1_datefolder /f
-reg delete HKCU\Software\Classes\.tmm /f
-reg delete HKCU\Software\Classes\atmm /f
+reg delete HKCU\Software\Classes\Directory\Background\shell\at_2_hashfile /f
+# reg delete HKCU\Software\Classes\.tmm /f
+# reg delete HKCU\Software\Classes\atmm /f
 reg delete HKCU\Software\Classes\.sum /f
 reg delete HKCU\Software\Classes\.md5 /f
 reg delete HKCU\Software\Classes\.sha1 /f
