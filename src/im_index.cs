@@ -121,7 +121,7 @@ namespace Tmm
             }
 
             SetIndex(index, n_rev);
-            FileNameShow();
+            //FileNameShow();
             string search = GetSearchName();
             foreach (FileInfo fi in src.Directory.GetFiles(search))
             {
@@ -170,7 +170,7 @@ namespace Tmm
             }
 
             SetIndex(index, n_rev);
-            FileNameShow();
+            //FileNameShow();
             string search = GetSearchName();
             foreach (DirectoryInfo di in src.Parent.GetDirectories(search))
             {
@@ -213,7 +213,7 @@ namespace Tmm
         public DirectoryInfo NewIndexed(DirectoryInfo parent, string name)
         {
             SetSource(name, 0, 0);
-            FileNameShow();
+            //FileNameShow();
             string search = GetSearchName();
             foreach (DirectoryInfo di in parent.GetDirectories(search))
             {
