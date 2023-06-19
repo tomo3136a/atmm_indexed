@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Drawing;
 using System.Windows.Forms;
+using Microsoft.Win32;
 
 namespace Tmm
 {
@@ -76,6 +77,7 @@ namespace Tmm
                 //TODO: reject charactor from tag-string inner
                 s = s.Trim(new char[]{' ','\t','\v','_',_tag_left,_tag_right});
                 _tag = (s.Length > 0) ? (_tag_left + s + _tag_right) : "";
+                UpdateTag(_tag);
                 s = BuildName();
                 src.MoveTo(s);
                 src = new FileInfo(s);
@@ -99,11 +101,50 @@ namespace Tmm
                 //TODO: reject charactor from tag-string inner
                 s = s.Trim(new char[]{' ','\t','\v','_',_tag_left,_tag_right});
                 _tag = (s.Length > 0) ? (_tag_left + s + _tag_right) : "";
+                UpdateTag(_tag);
                 s = BuildName();
                 src.MoveTo(s);
                 src = new DirectoryInfo(s);
             }
             return src;
+        }
+
+        void UpdateTag(string s)
+        {
+            var skey = @"SOFTWARE\Classes\atmm\tag";
+            RegistryKey rkey = Registry.CurrentUser.OpenSubKey(skey, true);
+            if (rkey != null) {
+                var klst = "abcd";
+                var ks = (string)rkey.GetValue("");
+                foreach(var k in ks) {
+                    var v = (string)rkey.GetValue("" + k);
+                    if (s == v) {
+                        var i = ks.IndexOf(k);
+                        if (0 < i) {
+                            ks = "" + k + ks.Remove(i, 1);
+                            rkey.SetValue("", ks);
+                        }
+                        return;
+                    }
+                    var j = klst.IndexOf(k);
+                    if (0 <= j) {
+                        klst = klst.Remove(j, 1);
+                    }
+                }
+                if (0 == klst.Length) {
+                    var k = "" + ks[ks.Length-1];
+                    rkey.DeleteValue(k);
+                    ks = k + ks.Remove(ks.Length-1, 1);
+                    rkey.SetValue("", ks);
+                    rkey.SetValue(k, s);
+                }
+                else {
+                    var k = "" + klst[0];
+                    ks = k + ks;
+                    rkey.SetValue("", ks);
+                    rkey.SetValue(k, s);
+                }
+            }
         }
     }
 }

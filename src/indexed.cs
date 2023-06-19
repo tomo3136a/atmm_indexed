@@ -44,6 +44,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Drawing;
 using System.Windows.Forms;
+using Microsoft.Win32;
 
 namespace Tmm
 {
@@ -60,7 +61,7 @@ namespace Tmm
             Label textLabel = new Label();
             Button accept = new Button();
             Button cancel = new Button();
-            TextBox textBox = new TextBox();
+            ComboBox textBox = new ComboBox();
             Label modeLabel = new Label();
             ComboBox comboBox = new ComboBox();
 
@@ -186,6 +187,18 @@ namespace Tmm
 
             /////////////////////////////////////////////////////////////////////
 
+            public void AddText(string s)
+            {
+                if (textBox.Items.Count == 1)
+                {
+                    textBox.Visible = true;
+                    textBox.SelectedIndex = 0;
+                }
+                textBox.Items.Add(s);
+            }
+
+
+            /////////////////////////////////////////////////////////////////////
             public void AddFormatType(string s)
             {
                 if (comboBox.Items.Count == 1)
@@ -230,6 +243,16 @@ namespace Tmm
             string text = "タグを入れてください。";
             InputDialog dlg = new InputDialog(text, title);
             dlg.Value = tag;
+
+            var skey = @"SOFTWARE\Classes\atmm\tag";
+            RegistryKey rkey = Registry.CurrentUser.OpenSubKey(skey);
+            if (rkey != null) {
+                string ks = (string)rkey.GetValue("");
+                foreach(var k in ks) {
+                    string v = (string)rkey.GetValue("" + k);
+                    dlg.AddText(v);
+                }
+            }
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 return dlg.Value;
