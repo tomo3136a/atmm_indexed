@@ -31,7 +31,7 @@ namespace Tmm
         /// <summary>
         /// filename pattern
         /// </summary>
-        const string ptn_name = @"^(?<tag>\u3010[^\u3011]*\u3011)?(?<name>[^.]+)(?<ext>[.].+)?$";
+        const string ptn_name = @"^(?<tag>(?:\u25a0|\u3010[^\u3011]*\u3011))?(?<name>[^.]+)(?<ext>[.].+)?$";
         static Regex re_name = new Regex(ptn_name,
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
@@ -216,12 +216,22 @@ namespace Tmm
         /////////////////////////////////////////////////////////////////////
         // file name
 
+        string _src;
         string _tag;
         string _name;
         string _note;
         string _ext;
         long _last;
         long _size;
+
+        public string FileName { get{ return _src; } }
+        public string Tag { get{ return _tag; } }
+        public string Name { get{ return _name; } }
+        public string Note { get{ return _note; } }
+        public string Ext { get{ return _ext; } }
+        public long LastTime { get{ return _last; } }
+        public long FileSize { get{ return _size; } }
+
 
         public void FileNameShow()
         {
@@ -247,6 +257,7 @@ namespace Tmm
             _ext = "";
             _size = size;
             _last = last;
+            _src = name;
             
             Match m1 = re_name.Match(name);
             if (! m1.Success) return false;
@@ -297,6 +308,7 @@ namespace Tmm
             s += (_mode == 0) ? (_name + sep + index) : (index + sep + _name);
             s += (_note.Length > 0) ? ("_" + _note) : "";
             s += _ext;
+            _src = s;
             return s;
         }
 

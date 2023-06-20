@@ -77,6 +77,7 @@ namespace Tmm
                 //TODO: reject charactor from tag-string inner
                 s = s.Trim(new char[]{' ','\t','\v','_',_tag_left,_tag_right});
                 _tag = (s.Length > 0) ? (_tag_left + s + _tag_right) : "";
+                if (s == "-" || s=="\u25a0") { _tag = "\u25a0"; }
                 UpdateTag(_tag);
                 s = BuildName();
                 src.MoveTo(s);

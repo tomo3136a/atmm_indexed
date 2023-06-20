@@ -62,13 +62,15 @@ namespace Tmm
             Button accept = new Button();
             Button cancel = new Button();
             ComboBox textBox = new ComboBox();
+            Label srcLabel = new Label();
+            Label dstLabel = new Label();
             Label modeLabel = new Label();
             ComboBox comboBox = new ComboBox();
 
             public InputDialog(string text, string caption)
             {
                 int width = 400;
-                int height = 160;
+                int height = 190;
                 this.Width = width;
                 this.Height = height;
                 //this.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -118,8 +120,22 @@ namespace Tmm
                 textBox.Width = w - 10 * 2;
                 textBox.Left = 10;
                 textBox.AutoSize = true;
-                textBox.Top = this.ClientSize.Height - 3 * 10
+                textBox.Top = this.ClientSize.Height - 7 * 10
                     - accept.Height - textBox.Height;
+
+                srcLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+                srcLabel.Left = 10;
+                srcLabel.Top = h - 7*10 + 5 - accept.Height;;
+                srcLabel.Text = "src:";
+                srcLabel.AutoSize = true;
+                srcLabel.MaximumSize = new Size(width - 20, 0);
+
+                dstLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+                dstLabel.Left = 10;
+                dstLabel.Top = h - 5*10 + 10 - accept.Height;
+                dstLabel.Text = "dst:";
+                dstLabel.AutoSize = true;
+                dstLabel.MaximumSize = new Size(width - 20, 0);
 
                 comboBox.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
                 //comboBox.Width = w - 10 * 2;
@@ -129,6 +145,8 @@ namespace Tmm
                 comboBox.Visible = false;
 
                 this.Controls.Add(textBox);
+                this.Controls.Add(srcLabel);
+                this.Controls.Add(dstLabel);
                 this.Controls.Add(comboBox);
                 this.Controls.Add(accept);
                 this.Controls.Add(cancel);
@@ -156,6 +174,23 @@ namespace Tmm
                     textBox.Text = value;
                 }
             }
+
+            public string SrcName
+            {
+                set
+                {
+                    srcLabel.Text = value;
+                }
+            }
+            public string DstName
+            {
+                set
+                {
+                    dstLabel.Text = value;
+                }
+            }
+
+
 
             /////////////////////////////////////////////////////////////////////
 
@@ -189,11 +224,6 @@ namespace Tmm
 
             public void AddText(string s)
             {
-                if (textBox.Items.Count == 1)
-                {
-                    textBox.Visible = true;
-                    textBox.SelectedIndex = 0;
-                }
                 textBox.Items.Add(s);
             }
 
@@ -237,12 +267,13 @@ namespace Tmm
         /// </summary>
         /// <param name="tag"></param>
         /// <returns></returns>
-        public static string TaggingDialog(string tag)
+        public static string TaggingDialog(string tag, string src)
         {
             string title = "indexed";
             string text = "タグを入れてください。";
             InputDialog dlg = new InputDialog(text, title);
-            dlg.Value = tag;
+            dlg.SrcName = "変更前: " + src;
+            dlg.DstName = " ";
 
             var skey = @"SOFTWARE\Classes\atmm\tag";
             RegistryKey rkey = Registry.CurrentUser.OpenSubKey(skey);
@@ -253,6 +284,7 @@ namespace Tmm
                     dlg.AddText(v);
                 }
             }
+            dlg.Value = tag;
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 return dlg.Value;
@@ -488,7 +520,8 @@ namespace Tmm
 
             public static string TaggingProc(ItemManager im, string tag)
             {
-                return TaggingDialog(tag);
+                string src = im.FileName;
+                return TaggingDialog(tag, src);
             }
 
             /// <summary>
