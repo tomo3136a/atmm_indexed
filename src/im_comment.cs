@@ -111,6 +111,7 @@ namespace Tmm
 
         void UpdateTag(string s)
         {
+            if (0 == s.Length) return;
             var skey = @"SOFTWARE\Classes\atmm\tag";
             RegistryKey rkey = Registry.CurrentUser.OpenSubKey(skey, true);
             if (rkey != null) {
