@@ -77,8 +77,8 @@ namespace Tmm
                 string msg = "同じファイルがあります。\n" + fi.Name;
                 msg += "\n\n操作を取りやめますか？";
                 DialogResult result = MessageBox.Show(msg, "確認", 
-                    MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
-                if (result == DialogResult.OK)
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (result != DialogResult.No)
                 {
                     return false;
                 }
@@ -99,8 +99,8 @@ namespace Tmm
                 string msg = "同じディレクトリがあります。\n" + di.Name;
                 msg += "\n\n操作を取りやめますか？";
                 DialogResult result = MessageBox.Show(msg, "確認", 
-                    MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
-                if (result == DialogResult.OK)
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (result != DialogResult.No)
                 {
                     return false;
                 }
