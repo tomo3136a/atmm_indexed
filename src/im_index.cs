@@ -12,13 +12,18 @@ namespace Tmm
 
         bool NextIndexedItem(string file_name)
         {
+            string ext = "";
+            var p = file_name.LastIndexOf('.');
+            if (p > 0) {
+                ext = file_name.Substring(p);
+                file_name = file_name.Substring(0, p);
+            }
             Match m1 = re_name.Match(file_name);
             if (!m1.Success)
             {
                 return false;
             }
             string name = m1.Groups["name"].Value;
-            string ext = m1.Groups["ext"].Value;
             if (String.Compare(_ext, ext, false) != 0)
             {
                 return false;
@@ -119,9 +124,7 @@ namespace Tmm
                 MessageBox.Show("no match: "+src.Name);
                 return null;
             }
-
             SetIndex(index, n_rev);
-            //FileNameShow();
             string search = GetSearchName();
             foreach (FileInfo fi in src.Directory.GetFiles(search))
             {
@@ -166,11 +169,10 @@ namespace Tmm
             if (! SetSource(src.Name, src.GetFileSystemInfos().Length, src.LastWriteTime.Ticks))
             {
                 MessageBox.Show("no match: "+src.Name);
-                return src;
+                return null;
             }
 
             SetIndex(index, n_rev);
-            //FileNameShow();
             string search = GetSearchName();
             foreach (DirectoryInfo di in src.Parent.GetDirectories(search))
             {
@@ -212,8 +214,9 @@ namespace Tmm
         /// <returns></returns>
         public DirectoryInfo NewIndexed(DirectoryInfo parent, string name)
         {
-            SetSource(name, 0, 0);
-            //FileNameShow();
+            if (false == SetSource(name)) {
+                FileNameShow();
+            }
             string search = GetSearchName();
             foreach (DirectoryInfo di in parent.GetDirectories(search))
             {

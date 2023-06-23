@@ -44,7 +44,7 @@ REGEDIT4
 [HKEY_CURRENT_USER\Software\Classes\hashfile\shell]
 
 [HKEY_CURRENT_USER\Software\Classes\hashfile\shell\test]
-"MUIVerb"="ハッシュ値テスト(&H)"
+"MUIVerb"="ハッシュ値テスト(&H)
 "Description"="ハッシュ値をテストする。"
 
 [HKEY_CURRENT_USER\Software\Classes\hashfile\shell\test\command]

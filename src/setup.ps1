@@ -5,7 +5,7 @@ $OutputPath = "c:/opt/bin"
 
 $Path = "*indexed.cs", "im*.cs"
 $ReferencedAssemblies = "System.Drawing", "System.Windows.Forms"
-$orgs = "setup1.org", "setup2.org", "setup3.org"
+$orgs = "setup1.org", "setup2.org", "setup3.org", "setup4.org"
 
 if ( $Args[0] -ne "-u" ) {
   Write-Host "install start." -ForegroundColor Yellow
@@ -54,8 +54,8 @@ reg delete HKCU\Software\Classes\Directory\shell\at_8_tagging /f
 reg delete HKCU\Software\Classes\Directory\shell\at_9_comment /f
 reg delete HKCU\Software\Classes\Directory\Background\shell\at_1_datefolder /f
 reg delete HKCU\Software\Classes\Directory\Background\shell\at_2_hashfile /f
-# reg delete HKCU\Software\Classes\.tmm /f
-# reg delete HKCU\Software\Classes\atmm /f
+reg delete HKCU\Software\Classes\.at /f
+reg delete HKCU\Software\Classes\at /f
 reg delete HKCU\Software\Classes\.sum /f
 reg delete HKCU\Software\Classes\.md5 /f
 reg delete HKCU\Software\Classes\.sha1 /f

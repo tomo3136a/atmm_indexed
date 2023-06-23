@@ -20,6 +20,14 @@ REGEDIT4
 [HKEY_CURRENT_USER\Software\Classes\Directory\shell\at_2_snapshot\command]
 @="\"{program}\" -s \"%V\""
 
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\at_4_backup]
+"MUIVerb"="バックアップへ移動(&B)"
+"Description"="OLDフォルダに移動します。"
+"AppliesTo"="NOT folder:~=\\_old"
+
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\at_4_backup\command]
+@="\"{program}\" -b \"%V\""
+
 [HKEY_CURRENT_USER\Software\Classes\Directory\shell\at_8_tagging]
 "MUIVerb"="タグ追加(&T)"
 "Description"="フォルダ名にタグを追加する。"

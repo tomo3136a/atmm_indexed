@@ -31,7 +31,7 @@ namespace Tmm
         /// <summary>
         /// filename pattern
         /// </summary>
-        const string ptn_name = @"^(?<tag>(?:\u25a0|\u3010[^\u3011]*\u3011))?(?<name>[^.]+)(?<ext>[.].+)?$";
+        const string ptn_name = @"^(?<tag>(?:\u25a0|\u3010[^\u3011]*\u3011))?(?<name>.+)$";
         static Regex re_name = new Regex(ptn_name,
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
@@ -239,7 +239,8 @@ namespace Tmm
             var s2 = "name="+_name+"\rext="+_ext;
             var s3 = "tag="+_tag+"\rnote="+_note;
             var s4 = "last="+_last+"\rsize="+_size;
-            MessageBox.Show(s1+"\r"+s2+"\r"+s3+"\r"+s4, "FileName");
+            var s5 = "src="+_src+"\rsearch="+GetSearchName();
+            MessageBox.Show(s1+"\r"+s2+"\r"+s3+"\r"+s4+"\r"+s5, "FileName");
         }
 
         /// <summary>
@@ -258,12 +259,17 @@ namespace Tmm
             _size = size;
             _last = last;
             _src = name;
+
+            var p = name.LastIndexOf('.');
+            if (p > 0) {
+                _ext = name.Substring(p);
+                name = name.Substring(0, p);
+            }
             
             Match m1 = re_name.Match(name);
             if (! m1.Success) return false;
             _tag = m1.Groups["tag"].Value;
             _name = m1.Groups["name"].Value;
-            _ext = m1.Groups["ext"].Value;
 
             Match m2 = re_id.Match(_name);
             if (! m2.Success) return true;
@@ -320,7 +326,9 @@ namespace Tmm
         public string OriginalName(FileInfo src)
         {
             string p = src.Directory.Parent.FullName;
-            SetSource(src.Name, 0, 0);
+            if (false == SetSource(src.Name)) {
+                FileNameShow();
+            }
             _index = "";
             _n_rev = 0;
             _tag = "";

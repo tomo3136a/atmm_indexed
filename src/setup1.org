@@ -21,7 +21,7 @@ REGEDIT4
 
 [HKEY_CURRENT_USER\Software\Classes\*\shell\at_4_backup]
 "MUIVerb"="バックアップへ移動(&B)"
-"Description"="OLDフォルダに日付を付けて移動します。"
+"Description"="OLDフォルダに移動します。"
 "AppliesTo"="NOT folder:~=\\_old"
 
 [HKEY_CURRENT_USER\Software\Classes\*\shell\at_4_backup\command]

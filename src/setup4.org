@@ -1,58 +1,21 @@
 REGEDIT4
 
-[HKEY_CURRENT_USER\Software\Classes\*]
-
-[HKEY_CURRENT_USER\Software\Classes\*\Shell]
-
-[HKEY_CURRENT_USER\Software\Classes\*\Shell\edit]
-
-[HKEY_CURRENT_USER\Software\Classes\*\Shell\edit\command]
-@="\"%LOCALAPPDATA%\\Programs\\Microsoft VS Code\\Code.exe\" \"%1\""
-
-[HKEY_CURRENT_USER\Software\Classes\*\Shell\at_5_checkout1]
-"MUIVerb"="【編集】チェックアウト(&O)"
-"Description"="ディスクトップにチェックアウトします。"
-"AppliesTo"="folder:~=\\work\\ AND NOT file:=<【"
-"Extended"=""
-
-[HKEY_CURRENT_USER\Software\Classes\*\Shell\at_5_checkout1\command]
-@="\"C:\\opt\\bin\\indexed.exe\" -o1p \"%V\""
-
-[HKEY_CURRENT_USER\Software\Classes\*\Shell\at_6_checkout2]
-"MUIVerb"="【参考】チェックアウト(&O)"
-"Description"="ディスクトップにチェックアウトします。"
-"AppliesTo"="folder:~=\\work\\ AND NOT file:=<【"
-"Extended"=""
-
-[HKEY_CURRENT_USER\Software\Classes\*\Shell\at_6_checkout2\command]
-@="\"C:\\opt\\bin\\indexed.exe\" -o2f \"%V\""
-
-[HKEY_CURRENT_USER\Software\Classes\*\Shell\at_7_checkin]
-"MUIVerb"="チェックイン(&I)"
-"Description"="チェックインします。"
-"AppliesTo"="folder:~=\\デスクトップ\\"
-"Extended"=""
-
-[HKEY_CURRENT_USER\Software\Classes\*\Shell\at_7_checkin\command]
-@="\"C:\\opt\\bin\\indexed.exe\" -i \"%V\""
-
-[HKEY_CURRENT_USER\Software\Classes\*\Shell\at_8_tagging]
-"MUIVerb"="タグ編集(&T)"
-"Description"="ファイル名タグを編集する。"
-
 [HKEY_CURRENT_USER\Software\Classes\.tmm]
 @="atmm"
 
 [HKEY_CURRENT_USER\Software\Classes\.tmm\ShellNew]
-"MenuText"="日付フォルダ"
+"MenuText"="���t�t�H���_"
 "ItemName"="@%SystemRoot%\system32\notepad.exe,-470"
 "Command"="\"{program}\" -d"
 
 [HKEY_CURRENT_USER\Software\Classes\atmm]
-@="Advainced T's Manipulator Module"
+@="Advainced T's Manipulator Modules"
 
 [HKEY_CURRENT_USER\Software\Classes\atmm\tag]
 @="abc"
-"a"="【参考】"
-"b"="【編集中】"
-"c"="【破棄】"
+"a"="�y�Q�l�z"
+"b"="�y�ҏW���z"
+"c"="�y�j���z"
+
+[HKEY_CURRENT_USER\Software\Classes\atmm\note]
+@=""

@@ -25,11 +25,14 @@ namespace Tmm
         public FileInfo Comment(FileInfo src, CallBack proc)
         {
             myCallBack = new CallBack(proc);
-            SetSource(src.Name);
+            if (false == SetSource(src.Name)) {
+                FileNameShow();
+            }
             string s = (myCallBack == null) ? _note : myCallBack(this, _note);
             if (s != null)
             {
                 _note = s.Trim().TrimStart(new char[]{'_'});
+                UpdateNote(_note);
                 s = BuildName();
                 src.MoveTo(s);
                 src = new FileInfo(s);
@@ -46,11 +49,14 @@ namespace Tmm
         public DirectoryInfo Comment(DirectoryInfo src, CallBack proc)
         {
             myCallBack = new CallBack(proc);
-            SetSource(src.Name);
+            if (false == SetSource(src.Name)) {
+                FileNameShow();
+            }
             string s = (myCallBack == null) ? _note : myCallBack(this, _note);
             if (s != null)
             {
                 _note = s.Trim().TrimStart(new char[]{'_'});
+                UpdateNote(_note);
                 s = BuildName();
                 src.MoveTo(s);
                 src = new DirectoryInfo(s);
@@ -70,7 +76,9 @@ namespace Tmm
         public FileInfo Tagging(FileInfo src, CallBack proc)
         {
             myCallBack = new CallBack(proc);
-            SetSource(src.Name);
+            if (false == SetSource(src.Name)) {
+                FileNameShow();
+            }
             string s = (myCallBack == null) ? _tag : myCallBack(this, _tag);
             if (s != null)
             {
@@ -95,7 +103,9 @@ namespace Tmm
         public DirectoryInfo Tagging(DirectoryInfo src, CallBack proc)
         {
             myCallBack = new CallBack(proc);
-            SetSource(src.Name);
+            if (false == SetSource(src.Name)) {
+                FileNameShow();
+            }
             string s = (myCallBack == null) ? _tag : myCallBack(this, _tag);
             if (s != null)
             {
@@ -110,10 +120,9 @@ namespace Tmm
             return src;
         }
 
-        void UpdateTag(string s)
+        void UpdateItem(string kw, string s)
         {
-            if (0 == s.Length) return;
-            var skey = @"SOFTWARE\Classes\atmm\tag";
+            var skey = @"SOFTWARE\Classes\atmm\" + kw;
             RegistryKey rkey = Registry.CurrentUser.OpenSubKey(skey, true);
             if (rkey != null) {
                 var klst = "abcd";
@@ -147,6 +156,19 @@ namespace Tmm
                     rkey.SetValue(k, s);
                 }
             }
+        }
+
+        void UpdateNote(string s)
+        {
+            if (0 == s.Length) return;
+            UpdateItem("note", s);
+        }
+
+
+        void UpdateTag(string s)
+        {
+            if (0 == s.Length) return;
+            UpdateItem("tag", s);
         }
     }
 }

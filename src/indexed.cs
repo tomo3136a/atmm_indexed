@@ -299,11 +299,23 @@ namespace Tmm
         /// </summary>
         /// <param name="comment"></param>
         /// <returns></returns>
-        public static string CommentDialog(string comment)
+        public static string CommentDialog(string comment, string src)
         {
             string title = "indexed";
             string text = "コメントを入れてください。";
             InputDialog dlg = new InputDialog(text, title);
+            dlg.SrcName = "変更前: " + src;
+            dlg.DstName = " ";
+
+            var skey = @"SOFTWARE\Classes\atmm\note";
+            RegistryKey rkey = Registry.CurrentUser.OpenSubKey(skey);
+            if (rkey != null) {
+                string ks = (string)rkey.GetValue("");
+                foreach(var k in ks) {
+                    string v = (string)rkey.GetValue("" + k);
+                    dlg.AddText(v);
+                }
+            }
             dlg.Value = comment;
             if (dlg.ShowDialog() == DialogResult.OK)
             {
@@ -515,12 +527,13 @@ namespace Tmm
 
             public static string CommentProc(ItemManager im, string comment)
             {
-                return CommentDialog(comment);
+                var src = im.FileName;
+                return CommentDialog(comment, src);
             }
 
             public static string TaggingProc(ItemManager im, string tag)
             {
-                string src = im.FileName;
+                var src = im.FileName;
                 return TaggingDialog(tag, src);
             }
 
