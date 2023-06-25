@@ -45,6 +45,7 @@ using System.Text.RegularExpressions;
 using System.Drawing;
 using System.Windows.Forms;
 using Microsoft.Win32;
+using System.Threading;
 
 namespace Tmm
 {
@@ -822,11 +823,34 @@ namespace Tmm
         /////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////
 
+
+        private static string AppName = "indexedapp";
+        private static Mutex mutexObject;
+
         /// <summary>
         ///main process
         /// </summary>
         /// <param name="args">file/folder path or options</param>
+        [STAThread]
         public static void Main(string[] args)
+        {
+            OperatingSystem os = Environment.OSVersion;
+            if ((os.Platform == PlatformID.Win32NT) && (os.Version.Major >= 5)) {
+                AppName = @"Global\" + AppName;
+            }
+            using (mutexObject = new Mutex(false, AppName)) {
+                if (!mutexObject.WaitOne(60000, true)) {
+                    MessageBox.Show("すでに起動しています。2つ同時には起動できません。", AppName);
+                    mutexObject.Close();
+                    return;
+                }
+                Sub(args);
+                mutexObject.ReleaseMutex();
+            }
+            mutexObject.Close();
+        }
+
+        static void Sub(string[] args)
         {
             try
             {
