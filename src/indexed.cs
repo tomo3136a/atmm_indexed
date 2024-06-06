@@ -155,6 +155,7 @@ namespace Tmm
                 this.Controls.Add(modeLabel);
                 this.AcceptButton = accept;
                 this.CancelButton = cancel;
+                this.Focus();
             }
 
             void on_close(Object sender, EventArgs e)

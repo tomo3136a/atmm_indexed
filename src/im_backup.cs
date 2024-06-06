@@ -13,41 +13,6 @@ namespace Tmm
         /// </summary>
         public const string backup_name = @"_old";
 
-        /// <summary>
-        /// backup folder name
-        /// </summary>
-        public const string backup_hash = @"_backup.sum";
-
-        /// <summary>
-        /// backup file size max
-        /// </summary>
-        public const int backup_hash_calc_max = 32*1024*1024;
-
-        // /// <summary>
-        // /// log file name
-        // /// </summary>
-        // public const string hash_name = @"_hashfile.sum";
-
-        // static readonly HashAlgorithm hashProvider = new MD5CryptoServiceProvider();
-
-        // public static string GetFileHash(string path)
-        // {
-        //     using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-        //     {
-        //         var bs = hashProvider.ComputeHash(fs);
-        //         return BitConverter.ToString(bs).ToLower().Replace("-", "");
-        //     }
-        // }
-
-        // public static void WriteLog(string path, string name, string hash)
-        // {
-        //     var p = Path.Combine(path, hash_name);
-        //     using (var file = new StreamWriter(p, true))
-        //     {
-        //         file.WriteLineAsync(hash + " * " + name);
-        //     }
-        // }
-
         /////////////////////////////////////////////////////////////////////
         // backup
 
@@ -59,7 +24,6 @@ namespace Tmm
         public FileInfo BackupTo(FileInfo src, CallBack proc)
         {
             myCallBack = new CallBack(proc);
-            var sh = GetFileHash(src.FullName);
             var dp = Path.Combine(src.DirectoryName, backup_name);
             var di = new DirectoryInfo(dp);
             if (di.Exists)
@@ -69,32 +33,27 @@ namespace Tmm
                 {
                     if (src.Length == fi.Length)
                     {
-                        if (src.Length < backup_hash_calc_max)
+                        if (src.LastWriteTime == fi.LastWriteTime)
                         {
-                            var dh = GetFileHash(fi.FullName);
-                            if (sh == dh)
-                            {
-                                lst.Add(fi);
-                            }
-                        }
-                        else
-                        {
-                            if (src.LastWriteTime == fi.LastWriteTime)
-                            {
-                                lst.Add(fi);
-                            }
+                            lst.Add(fi);
                         }
                     }
                 }
                 if (lst.Count > 0)
                 {
-                    var msg = "行き先に同じファイルがあります。";
+                    var msg = "移動先に同じファイルがあります。";
                     msg += " ("+lst.Count+")\r\n";
                     msg += "移動元：\t"+src.Name+"\r\n\r\n";
                     msg += "移動先：\t";
+                    var i = 0;
                     foreach (var fi in lst)
                     {
                         msg += fi.Name + "\r\n" + "\t";
+                        i ++;
+                        if (i > 10) {
+                            msg += "...";
+                            break;
+                        }
                     }
                     MessageBox.Show(msg, "indexed");
                 }
@@ -121,8 +80,6 @@ namespace Tmm
                 dst = new FileInfo(s);
             }
             src.MoveTo(s);
-            s = Path.Combine(dp, backup_hash);
-            WriteHashFile(s, src.Name, sh, true);
             dst = new FileInfo(s);
             return dst;
         }
@@ -190,7 +147,7 @@ namespace Tmm
                 s = System.IO.Path.Combine(p, r);
                 dst = new FileInfo(s);
             }
-            src.CopyTo(s);
+            src.MoveTo(s);
             dst = new FileInfo(s);
             return dst;
         }
