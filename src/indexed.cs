@@ -553,11 +553,11 @@ namespace Tmm
                 if (HasMode(Mode.IndexedMode))
                 {
                     im.SetMode(1);
-                    src = im.Indexed(src, index, 0);
+                    src = im.Indexed(src, index, 0, _level);
                 }
                 else if (HasMode(Mode.SnapshotMode))
                 {
-                    src = im.Indexed(src, index, 0);
+                    src = im.Indexed(src, index, 0, _level);
                 }
                 if (null == src) return null;
                 //action backup/restore
@@ -594,7 +594,6 @@ namespace Tmm
                 Verbose("ExecuteBackground:\n  src  ="+dst+"\n  index="+index);
                 if (HasMode(ItemJob.Mode.IndexedMode))
                 {
-                    MessageBox.Show("ExecuteBackground");
                     InputDialog dlg = NewNameDialog("", index);
                     string path = System.Environment.GetFolderPath(
                         Environment.SpecialFolder.Personal);

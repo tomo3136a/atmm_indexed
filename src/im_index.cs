@@ -164,7 +164,7 @@ namespace Tmm
         /// <param name="src"></param>
         /// <param name="index"></param>
         /// <returns></returns>
-        public DirectoryInfo Indexed(DirectoryInfo src, string index, int n_rev, bool move=true)
+        public DirectoryInfo Indexed(DirectoryInfo src, string index, int n_rev, int level=0, bool move=true)
         {
             if (! SetSource(src.Name, src.GetFileSystemInfos().Length, src.LastWriteTime.Ticks))
             {
@@ -191,16 +191,22 @@ namespace Tmm
                     }
                 }
             }
-            string s = BuildName();
-
-            DirectoryInfo dst = new DirectoryInfo(s);
-            if (move)
+            if (level == 1)
             {
-                src.MoveTo(s);
+                SetIndex("", 0);
             }
-            else
+            string s = BuildName();
+            DirectoryInfo dst = new DirectoryInfo(s);
+            if (dst.Name != src.Name)
             {
-                CopyAll(src, dst);
+                if (move)
+                {
+                    src.MoveTo(s);
+                }
+                else
+                {
+                    CopyAll(src, dst);
+                }
             }
             return dst;
         }

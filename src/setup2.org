@@ -12,6 +12,14 @@ REGEDIT4
 [HKEY_CURRENT_USER\Software\Classes\Directory\shell\at_1_datefolder\command]
 @="\"{program}\" -d \"%V\""
 
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\at_1_datefolder2]
+"MUIVerb"="日付フォルダから日付を削除(&H)"
+"Description"="日付付きフォルダから日付を削除する。"
+"AppliesTo"="system.filename:~<\"20\""
+
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\at_1_datefolder2\command]
+@="\"{program}\" -d1 \"%V\""
+
 [HKEY_CURRENT_USER\Software\Classes\Directory\shell\at_2_snapshot]
 "MUIVerb"="スナップショットに変更(&H)"
 "Description"="スナップショットフォルダに変更する。"
