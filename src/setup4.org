@@ -13,9 +13,9 @@ REGEDIT4
 
 [HKEY_CURRENT_USER\Software\Classes\atmm\tag]
 @="abc"
-"a"="yQlz"
-"b"="y•ÒW’†z"
-"c"="y”jŠüz"
+"a"="Ql"
+"b"="•ÒW’†"
+"c"="”jŠü"
 
 [HKEY_CURRENT_USER\Software\Classes\atmm\note]
 @=""

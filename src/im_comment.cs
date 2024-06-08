@@ -12,6 +12,7 @@ namespace Tmm
     {
         const char _tag_left = '\u3010';
         const char _tag_right = '\u3011';
+        const char _tag_center = '\u25a0';
 
         /////////////////////////////////////////////////////////////////////
         // comment-note
@@ -79,13 +80,16 @@ namespace Tmm
             if (false == SetSource(src.Name)) {
                 FileNameShow();
             }
-            string s = (myCallBack == null) ? _tag : myCallBack(this, _tag);
+            string s = _tag;
+            s = s.Replace(_tag_left.ToString(), "");
+            s = s.Replace(_tag_right.ToString(), "");
+            s = s.Replace(_tag_center.ToString(), "-");
+            s = (myCallBack == null) ? s : myCallBack(this, s);
             if (s != null)
             {
-                //TODO: reject charactor from tag-string inner
                 s = s.Trim(new char[]{' ','\t','\v','_',_tag_left,_tag_right});
                 _tag = (s.Length > 0) ? (_tag_left + s + _tag_right) : "";
-                if (s == "-" || s=="\u25a0") { _tag = "\u25a0"; }
+                if (s == "-" || s == "" + _tag_center) { _tag = "" + _tag_center; }
                 UpdateTag(_tag);
                 s = BuildName();
                 src.MoveTo(s);
@@ -106,12 +110,16 @@ namespace Tmm
             if (false == SetSource(src.Name)) {
                 FileNameShow();
             }
-            string s = (myCallBack == null) ? _tag : myCallBack(this, _tag);
+            string s = _tag;
+            s = s.Replace(_tag_left.ToString(), "");
+            s = s.Replace(_tag_right.ToString(), "");
+            s = s.Replace(_tag_center.ToString(), "-");
+            s = (myCallBack == null) ? s : myCallBack(this, s);
             if (s != null)
             {
-                //TODO: reject charactor from tag-string inner
                 s = s.Trim(new char[]{' ','\t','\v','_',_tag_left,_tag_right});
                 _tag = (s.Length > 0) ? (_tag_left + s + _tag_right) : "";
+                if (s == "-" || s == "" + _tag_center) { _tag = "" + _tag_center; }
                 UpdateTag(_tag);
                 s = BuildName();
                 src.MoveTo(s);
@@ -167,6 +175,10 @@ namespace Tmm
 
         void UpdateTag(string s)
         {
+            s = s.Replace(_tag_left.ToString(), "");
+            s = s.Replace(_tag_right.ToString(), "");
+            s = s.Replace(_tag_center.ToString(), "");
+            s = s.TrimStart(new char[]{ '-' });
             if (0 == s.Length) return;
             UpdateItem("tag", s);
         }
