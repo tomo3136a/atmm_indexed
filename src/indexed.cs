@@ -880,6 +880,11 @@ namespace Tmm
                     //target directory
                     foreach (DirectoryInfo di in parent.GetDirectories(name))
                     {
+                        if ((di.Attributes & FileAttributes.System) != 0)
+                        {
+                            MessageBox.Show("not support system folder.\n"+di.Name, "indexted", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            continue;
+                        }
                         long ticks = ItemManager.GetLastTimeInFolder(di, job.StartTicks);
                         string index = ItemManager.DateTimeFormat(ticks);
                         if (null == job.ExecuteDirectory(di, index))
@@ -893,6 +898,11 @@ namespace Tmm
                     //target file
                     foreach (FileInfo fi in parent.GetFiles(name))
                     {
+                        if ((fi.Attributes & FileAttributes.System) != 0)
+                        {
+                            MessageBox.Show("not support system file.\n" + fi.Name, "indexted", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            continue;
+                        }
                         long ticks = fi.LastWriteTime.Ticks;
                         string index = ItemManager.DateTimeFormat(ticks);
                         src = job.ExecuteFile(fi, index);
