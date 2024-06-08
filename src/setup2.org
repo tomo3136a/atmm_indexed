@@ -13,7 +13,7 @@ REGEDIT4
 @="\"{program}\" -d \"%V\""
 
 [HKEY_CURRENT_USER\Software\Classes\Directory\shell\at_1_datefolder2]
-"MUIVerb"="日付フォルダから日付を削除(&H)"
+"MUIVerb"="日付フォルダを戻す(&H)"
 "Description"="日付付きフォルダから日付を削除する。"
 "AppliesTo"="system.filename:~<\"20\""
 
