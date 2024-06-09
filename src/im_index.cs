@@ -144,16 +144,18 @@ namespace Tmm
                 }
             }
             string s = BuildName();
-
-            if (move)
-            {
-                src.MoveTo(s);
-            }
-            else
-            {
-                src.CopyTo(s);
-            }
             FileInfo dst = new FileInfo(s);
+            if (dst.Name != src.Name)
+            {
+                if (move)
+                {
+                    src.MoveTo(s);
+                }
+                else
+                {
+                    src.CopyTo(s);
+                }
+            }
             dst.Attributes |= FileAttributes.ReadOnly;
             return dst;
         }

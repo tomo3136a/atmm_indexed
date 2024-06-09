@@ -80,10 +80,7 @@ namespace Tmm
             if (false == SetSource(src.Name)) {
                 FileNameShow();
             }
-            string s = _tag;
-            s = s.Replace(_tag_left.ToString(), "");
-            s = s.Replace(_tag_right.ToString(), "");
-            s = s.Replace(_tag_center.ToString(), "-");
+            string s = TrimTag(_tag);
             s = (myCallBack == null) ? s : myCallBack(this, s);
             if (s != null)
             {
@@ -110,10 +107,7 @@ namespace Tmm
             if (false == SetSource(src.Name)) {
                 FileNameShow();
             }
-            string s = _tag;
-            s = s.Replace(_tag_left.ToString(), "");
-            s = s.Replace(_tag_right.ToString(), "");
-            s = s.Replace(_tag_center.ToString(), "-");
+            string s = TrimTag(_tag);
             s = (myCallBack == null) ? s : myCallBack(this, s);
             if (s != null)
             {
@@ -133,7 +127,7 @@ namespace Tmm
             var skey = @"SOFTWARE\Classes\atmm\" + kw;
             RegistryKey rkey = Registry.CurrentUser.OpenSubKey(skey, true);
             if (rkey != null) {
-                var klst = "abcd";
+                var klst = "abcdef";
                 var ks = (string)rkey.GetValue("");
                 foreach(var k in ks) {
                     var v = (string)rkey.GetValue("" + k);
@@ -172,15 +166,19 @@ namespace Tmm
             UpdateItem("note", s);
         }
 
-
         void UpdateTag(string s)
+        {
+            s = TrimTag(s).TrimStart(new char[]{ '-' });
+            if (0 == s.Length) return;
+            UpdateItem("tag", s);
+        }
+
+        string TrimTag(string s)
         {
             s = s.Replace(_tag_left.ToString(), "");
             s = s.Replace(_tag_right.ToString(), "");
-            s = s.Replace(_tag_center.ToString(), "");
-            s = s.TrimStart(new char[]{ '-' });
-            if (0 == s.Length) return;
-            UpdateItem("tag", s);
+            s = s.Replace(_tag_center.ToString(), "-");
+            return s;
         }
     }
 }

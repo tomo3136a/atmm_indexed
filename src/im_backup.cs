@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
-using System.Security.Cryptography;
+// using System.Security.Cryptography;
 
 namespace Tmm
 {
@@ -20,45 +20,13 @@ namespace Tmm
         /// backup file
         /// </summary>
         /// <param name="src"></param>
-        /// <returns></returns>
+        /// <returns>backupped file info</returns>
         public FileInfo BackupTo(FileInfo src, CallBack proc)
         {
             myCallBack = new CallBack(proc);
             var dp = Path.Combine(src.DirectoryName, backup_name);
             var di = new DirectoryInfo(dp);
-            if (di.Exists)
-            {
-                var lst = new List<FileInfo>();
-                foreach (var fi in di.EnumerateFiles())
-                {
-                    if (src.Length == fi.Length)
-                    {
-                        if (src.LastWriteTime == fi.LastWriteTime)
-                        {
-                            lst.Add(fi);
-                        }
-                    }
-                }
-                if (lst.Count > 0)
-                {
-                    var msg = "移動先に同じファイルがあります。";
-                    msg += " ("+lst.Count+")\r\n";
-                    msg += "移動元：\t"+src.Name+"\r\n\r\n";
-                    msg += "移動先：\t";
-                    var i = 0;
-                    foreach (var fi in lst)
-                    {
-                        msg += fi.Name + "\r\n" + "\t";
-                        i ++;
-                        if (i > 10) {
-                            msg += "...";
-                            break;
-                        }
-                    }
-                    MessageBox.Show(msg, "indexed");
-                }
-            }
-            else
+            if (!di.Exists)
             {
                 di.Create();
             }
@@ -88,7 +56,7 @@ namespace Tmm
         /// backup directory
         /// </summary>
         /// <param name="src"></param>
-        /// <returns></returns>
+        /// <returns>backupped directory info</returns>
         public DirectoryInfo BackupTo(DirectoryInfo src, CallBack proc)
         {
             myCallBack = new CallBack(proc);
@@ -121,12 +89,13 @@ namespace Tmm
         }
 
         /////////////////////////////////////////////////////////////////////
+        // restore
 
         /// <summary>
         /// restore file
         /// </summary>
         /// <param name="src"></param>
-        /// <returns></returns>
+        /// <returns>restored file info</returns>
         public FileInfo RestoreFrom(FileInfo src, CallBack proc)
         {
             myCallBack = new CallBack(proc);
@@ -147,8 +116,7 @@ namespace Tmm
                 s = System.IO.Path.Combine(p, r);
                 dst = new FileInfo(s);
             }
-            src.MoveTo(s);
-            dst = new FileInfo(s);
+            src.CopyTo(s);
             return dst;
         }
 
@@ -156,7 +124,7 @@ namespace Tmm
         /// restore directory
         /// </summary>
         /// <param name="src"></param>
-        /// <returns></returns>
+        /// <returns>restored directory info</returns>
         public DirectoryInfo RestoreFrom(DirectoryInfo src, CallBack proc)
         {
             myCallBack = new CallBack(proc);
@@ -178,8 +146,8 @@ namespace Tmm
                 dst = new DirectoryInfo(s);
             }
             CopyAll(src, dst);
-            dst = new DirectoryInfo(s);
             return dst;
         }
+
     }
 }

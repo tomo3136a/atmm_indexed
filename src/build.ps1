@@ -3,7 +3,7 @@
 $AppName = "indexed.exe"
 $OutputPath = "c:/opt/bin"
 
-$Path = "*indexed.cs", "im*.cs"
+$Path = "*indexed.cs", "im*.cs", "ui.cs"
 $ReferencedAssemblies = "System.Drawing", "System.Windows.Forms"
 $orgs = "setup1.org", "setup2.org", "setup3.org"
 
