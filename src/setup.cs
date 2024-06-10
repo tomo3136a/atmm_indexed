@@ -15,8 +15,7 @@ namespace Tmm
 
         static void InstallReg()
         {
-            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            //var path = @"c:\opt\";
+            var path = Assembly.GetExecutingAssembly().Location;
 
             Microsoft.Win32.RegistryKey regkey = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\Classes\*\shell\at_2_snapshot");
             regkey.SetValue("MUIVerb", "スナップショット(&H)");
