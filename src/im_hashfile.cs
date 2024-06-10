@@ -134,19 +134,6 @@ namespace Tmm
             }
             var common_algorithm = GetAlgorithm(col);
             var txt = "";
-            if (1 == col.Count)
-            {
-                var name = src.FullName;
-                name = name.Substring(0, name.Length - src.Extension.Length);
-                var hash = GetFileHash(name, common_algorithm);
-                if (col.ContainsValue(hash))
-                {
-                    var fi = new FileInfo(name);
-                    txt = "\u3007\t" + fi.Name + "\r\n";
-                    MessageBox.Show(txt, "Sum Check");
-                    return src;
-                }
-            }
             foreach (var fi in src.Directory.EnumerateFiles())
             {
                 if (0 > "._@".IndexOf(fi.Name[0]))
