@@ -1,4 +1,4 @@
 @echo off
 pushd %~dp0
-call install.cmd -u
+c:\opt\bin\indexed.exe -u1
 popd
