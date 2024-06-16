@@ -84,9 +84,7 @@ namespace Tmm
             s = (myCallBack == null) ? s : myCallBack(this, s);
             if (s != null)
             {
-                s = s.Trim(new char[]{' ','\t','\v','_',_tag_left,_tag_right});
-                _tag = (s.Length > 0) ? (_tag_left + s + _tag_right) : "";
-                if (s == "-" || s == "" + _tag_center) { _tag = "" + _tag_center; }
+                _tag = BuildTagName(s);
                 UpdateTag(_tag);
                 s = BuildName();
                 src.MoveTo(s);
@@ -111,9 +109,7 @@ namespace Tmm
             s = (myCallBack == null) ? s : myCallBack(this, s);
             if (s != null)
             {
-                s = s.Trim(new char[]{' ','\t','\v','_',_tag_left,_tag_right});
-                _tag = (s.Length > 0) ? (_tag_left + s + _tag_right) : "";
-                if (s == "-" || s == "" + _tag_center) { _tag = "" + _tag_center; }
+                _tag = BuildTagName(s);
                 UpdateTag(_tag);
                 s = BuildName();
                 src.MoveTo(s);
@@ -122,55 +118,20 @@ namespace Tmm
             return src;
         }
 
-        void UpdateItem(string kw, string s)
-        {
-            var skey = @"SOFTWARE\Classes\atmm\" + kw;
-            RegistryKey rkey = Registry.CurrentUser.OpenSubKey(skey, true);
-            if (rkey != null) {
-                var klst = "abcdef";
-                var ks = (string)rkey.GetValue("");
-                foreach(var k in ks) {
-                    var v = (string)rkey.GetValue("" + k);
-                    if (s == v) {
-                        var i = ks.IndexOf(k);
-                        if (0 < i) {
-                            ks = "" + k + ks.Remove(i, 1);
-                            rkey.SetValue("", ks);
-                        }
-                        return;
-                    }
-                    var j = klst.IndexOf(k);
-                    if (0 <= j) {
-                        klst = klst.Remove(j, 1);
-                    }
-                }
-                if (0 == klst.Length) {
-                    var k = "" + ks[ks.Length-1];
-                    rkey.DeleteValue(k);
-                    ks = k + ks.Remove(ks.Length-1, 1);
-                    rkey.SetValue("", ks);
-                    rkey.SetValue(k, s);
-                }
-                else {
-                    var k = "" + klst[0];
-                    ks = k + ks;
-                    rkey.SetValue("", ks);
-                    rkey.SetValue(k, s);
-                }
-            }
-        }
+        /////////////////////////////////////////////////////////////////////
+        // sub
 
         void UpdateNote(string s)
         {
             if (0 == s.Length) return;
-            UpdateItem("note", s);
+            Config.AddValue(@"note\recent", s);
         }
 
         void UpdateTag(string s)
         {
             s = TrimTag(s).TrimStart(new char[]{ '-' });
             if (0 == s.Length) return;
-            UpdateItem("tag", s);
+            Config.AddValue(@"tag\recent", s);
         }
 
         string TrimTag(string s)
@@ -178,6 +139,14 @@ namespace Tmm
             s = s.Replace(_tag_left.ToString(), "");
             s = s.Replace(_tag_right.ToString(), "");
             s = s.Replace(_tag_center.ToString(), "-");
+            return s;
+        }
+
+        string BuildTagName(string s)
+        {
+            s = s.Trim(new char[]{' ','\t','\v','_',_tag_left,_tag_right});
+            s = (s.Length > 0) ? (_tag_left + s + _tag_right) : "";
+            if (s == "-" || s == "" + _tag_center) { s = "" + _tag_center; }
             return s;
         }
     }

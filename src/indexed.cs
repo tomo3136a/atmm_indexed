@@ -166,7 +166,7 @@ namespace Tmm
             public static string RenameProc(ItemManager im, string name)
             {
                 var msg = "ファイル、またはフォルダが存在します。上書きしますか？";
-                var res = MessageBox.Show(msg, "indexed", MessageBoxButtons.YesNoCancel);
+                var res = MessageBox.Show(msg, AppName, MessageBoxButtons.YesNoCancel);
                 if (res == DialogResult.Yes)
                 {
                     return "*";
@@ -389,7 +389,7 @@ namespace Tmm
             {
                 if (HasMode(Mode.VerboseMode))
                 {
-                    MessageBox.Show(s);
+                    MessageBox.Show(s, AppName);
                 }
             }
 
@@ -480,7 +480,7 @@ namespace Tmm
         /////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////
-
+        //main
 
         private static string JobName = "indexedapp";
         private static string AppName = "indexed";
@@ -499,113 +499,119 @@ namespace Tmm
             }
             using (mutexObject = new Mutex(false, JobName)) {
                 if (!mutexObject.WaitOne(60000, true)) {
-                    MessageBox.Show("すでに起動しています。2つ同時には起動できません。\n" + JobName, AppName);
+                    MessageBox.Show("すでに起動しています。2つ同時には起動できません。\n" + JobName, 
+                        AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     mutexObject.Close();
                     return;
                 }
-                AppMain(args);
+                try
+                {
+                    AppMain(args);
+                }
+                catch
+                {
+                    MessageBox.Show("operation error.", 
+                        AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
                 mutexObject.ReleaseMutex();
             }
             mutexObject.Close();
         }
 
+        ///
         static void AppMain(string[] args)
         {
-            try
+            ItemJob job = new ItemJob();
+            FileInfo src = null;
+
+            bool no_target = true;
+            foreach (string arg in args)
             {
-                ItemJob job = new ItemJob();
-                FileInfo src = null;
-
-                bool no_target = true;
-                foreach (string arg in args)
+                //option
+                if (job.IsOption(arg))
                 {
-                    //option
-                    if (job.IsOption(arg))
+                    if (job.ParseOption(arg))
                     {
-                        if (job.ParseOption(arg))
-                        {
-                            continue;
-                        }
-                        MessageBox.Show("option error(" + arg + ")");
-                        return;
+                        continue;
                     }
-
-                    //parent or name
-                    string name = System.IO.Path.GetFileName(arg);
-                    string path = arg.Substring(0, arg.Length - name.Length);
-                    path = Path.GetFullPath((path.Length == 0) ? @".\" : path);
-                    DirectoryInfo parent = new DirectoryInfo(path);
-
-                    //target directory
-                    foreach (DirectoryInfo di in parent.GetDirectories(name))
-                    {
-                        if ((di.Attributes & FileAttributes.System) != 0)
-                        {
-                            MessageBox.Show("not support system folder.\n"+di.Name, "indexted", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            continue;
-                        }
-                        long ticks = ItemManager.GetLastTimeInFolder(di, job.StartTicks);
-                        string index = ItemManager.DateTimeFormat(ticks);
-                        if (null == job.ExecuteDirectory(di, index))
-                        {
-                            job.Verbose("stop operation. target directory.\n" + di.Name);
-                            return;
-                        }
-                        no_target = false;
-                    }
-
-                    //target file
-                    foreach (FileInfo fi in parent.GetFiles(name))
-                    {
-                        if ((fi.Attributes & FileAttributes.System) != 0)
-                        {
-                            MessageBox.Show("not support system file.\n" + fi.Name, "indexted", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            continue;
-                        }
-                        long ticks = fi.LastWriteTime.Ticks;
-                        string index = ItemManager.DateTimeFormat(ticks);
-                        src = job.ExecuteFile(fi, index);
-                        if (null == src)
-                        {
-                            job.Verbose("stop operation. target file.\n" + fi.Name);
-                            return;
-                        }
-                        no_target = false;
-                    }
-                }
-
-                if (job.HasMode(ItemJob.Mode.UpdateMode))
-                {
-                    if (1 == job.GetLevel())
-                    {
-                        UninstallReg();
-                        MessageBox.Show("uninstall.");
-                    }
-                    else
-                    {
-                        InstallReg();
-                        MessageBox.Show("install.");
-                    }
+                    MessageBox.Show("option error(" + arg + ")", 
+                        AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
-                //target directory background
-                if (no_target)
-                {
-                    DirectoryInfo di = new DirectoryInfo(".");
-                    string index = ItemManager.DateTimeFormat(job.StartTicks);
-                    job.ExecuteBackground(di, index);
-                }
-                if (src != null)
-                {
-                    job.ExecutePost(src);
-                }
-            }
-            catch
-            {
-                MessageBox.Show("operation error.");
-            }
-        }
+                //parent or name
+                string name = System.IO.Path.GetFileName(arg);
+                string path = arg.Substring(0, arg.Length - name.Length);
+                path = Path.GetFullPath((path.Length == 0) ? @".\" : path);
+                DirectoryInfo parent = new DirectoryInfo(path);
 
+                //target directory
+                foreach (DirectoryInfo di in parent.GetDirectories(name))
+                {
+                    if (0 != (di.Attributes & FileAttributes.System))
+                    {
+                        MessageBox.Show("not support system attribulte.\n" + di.Name, 
+                            AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        continue;
+                    }
+                    long ticks = ItemManager.GetLastTimeInFolder(di, job.StartTicks);
+                    string index = ItemManager.DateTimeFormat(ticks);
+                    if (null == job.ExecuteDirectory(di, index))
+                    {
+                        job.Verbose("stop operation. target directory.\n" + di.Name);
+                        return;
+                    }
+                    no_target = false;
+                }
+
+                //target file
+                foreach (FileInfo fi in parent.GetFiles(name))
+                {
+                    if ((fi.Attributes & FileAttributes.System) != 0)
+                    {
+                        MessageBox.Show("not support system file.\n" + fi.Name, AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        continue;
+                    }
+                    long ticks = fi.LastWriteTime.Ticks;
+                    string index = ItemManager.DateTimeFormat(ticks);
+                    src = job.ExecuteFile(fi, index);
+                    if (null == src)
+                    {
+                        job.Verbose("stop operation. target file.\n" + fi.Name);
+                        return;
+                    }
+                    no_target = false;
+                }
+            }
+
+            //setup
+            if (job.HasMode(ItemJob.Mode.UpdateMode))
+            {
+                if (1 == job.GetLevel())
+                {
+                    UninstallReg();
+                    job.Verbose("uninstalled.");
+                }
+                else
+                {
+                    InstallReg();
+                    job.Verbose("installed.");
+                }
+                return;
+            }
+
+            //target directory background
+            if (no_target)
+            {
+                DirectoryInfo di = new DirectoryInfo(".");
+                string index = ItemManager.DateTimeFormat(job.StartTicks);
+                job.ExecuteBackground(di, index);
+                return;
+            }
+            // if (src != null)
+            // {
+            //     job.ExecutePost(src);
+            // }
+        }
     }
 }
