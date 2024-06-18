@@ -135,7 +135,7 @@ namespace Tmm
                 this.Controls.Add(modeLabel);
                 this.AcceptButton = accept;
                 this.CancelButton = cancel;
-                this.Focus();
+                //this.Focus();
             }
 
             void on_close(Object sender, EventArgs e)
@@ -274,17 +274,17 @@ namespace Tmm
             InputDialog dlg = new InputDialog(text, title, true);
             dlg.SrcName = "変更前: " + src;
             dlg.DstName = " ";
-            string s = "";
-
+ 
             foreach (var v in Config.GetValues(@"tag"))
             {
                 dlg.AddListItem(v);
             }
+            dlg.AddText("");
             foreach (var v in Config.GetValues(@"tag\recent"))
             {
                 dlg.AddText(v);
             }
-            dlg.Value = s;
+            dlg.Value = tag;
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 return dlg.Value;
@@ -311,11 +311,11 @@ namespace Tmm
             {
                 dlg.AddListItem(v);
             }
+            dlg.AddText("");
             foreach (var v in Config.GetValues(@"note\recent"))
             {
                 dlg.AddText(v);
             }
-            dlg.Value = comment;
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 return dlg.Value;

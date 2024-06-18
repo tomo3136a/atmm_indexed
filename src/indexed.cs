@@ -482,9 +482,9 @@ namespace Tmm
         /////////////////////////////////////////////////////////////////////
         //main
 
-        private static string JobName = "indexedapp";
+        // private static string JobName = "indexedapp";
         private static string AppName = "indexed";
-        private static Mutex mutexObject;
+        // private static Mutex mutexObject;
 
         /// <summary>
         ///main process
@@ -493,17 +493,17 @@ namespace Tmm
         [STAThread]
         public static void Main(string[] args)
         {
-            OperatingSystem os = Environment.OSVersion;
-            if ((os.Platform == PlatformID.Win32NT) && (os.Version.Major >= 5)) {
-                JobName = @"Global\" + JobName;
-            }
-            using (mutexObject = new Mutex(false, JobName)) {
-                if (!mutexObject.WaitOne(60000, true)) {
-                    MessageBox.Show("すでに起動しています。2つ同時には起動できません。\n" + JobName, 
-                        AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    mutexObject.Close();
-                    return;
-                }
+            // OperatingSystem os = Environment.OSVersion;
+            // if ((os.Platform == PlatformID.Win32NT) && (os.Version.Major >= 5)) {
+            //     JobName = @"Global\" + JobName;
+            // }
+            // using (mutexObject = new Mutex(false, JobName)) {
+            //     if (!mutexObject.WaitOne(60000, true)) {
+            //         MessageBox.Show("すでに起動しています。2つ同時には起動できません。\n" + JobName, 
+            //             AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //         mutexObject.Close();
+            //         return;
+            //     }
                 try
                 {
                     AppMain(args);
@@ -513,9 +513,10 @@ namespace Tmm
                     MessageBox.Show("operation error.", 
                         AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-                mutexObject.ReleaseMutex();
-            }
-            mutexObject.Close();
+            //     mutexObject.ReleaseMutex();
+            // }
+            // mutexObject.Close();
+            // Thread.Sleep(5000);
         }
 
         ///
