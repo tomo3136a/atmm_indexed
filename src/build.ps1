@@ -1,12 +1,10 @@
 #installer for indexed.exe
 #
 $AppName = "indexed.exe"
-$OutputPath = "c:/opt/bin"
 $OutputPath = "../bin"
 
 $Path = "*indexed.cs", "im*.cs", "config.cs", "ui.cs", "setup.cs"
 $ReferencedAssemblies = "System.Drawing", "System.Windows.Forms"
-$orgs = "setup1.org", "setup2.org", "setup3.org"
 
 Write-Host "install start." -ForegroundColor Yellow
 
@@ -24,8 +22,8 @@ Add-Type -OutputType WindowsApplication `
   -Path $Path -OutputAssembly $OutputAssembly `
   -ReferencedAssemblies $ReferencedAssemblies
 
-  Copy-Item -Force ./install.cmd $OutputPath
-  Copy-Item -Force ./install-u.cmd $OutputPath
+Copy-Item -Force ./install.cmd $OutputPath
+Copy-Item -Force ./install-u.cmd $OutputPath
 
 Write-Host "build completed." -ForegroundColor Yellow
 $host.UI.RawUI.ReadKey() | Out-Null
