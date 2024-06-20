@@ -3,6 +3,9 @@ using System.IO;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using Microsoft.Win32;
+using System.Threading;
+using System.Reflection;
 
 namespace Tmm
 {
@@ -186,8 +189,6 @@ namespace Tmm
                 }
             }
 
-
-
             /////////////////////////////////////////////////////////////////////
 
             int mode;
@@ -229,6 +230,7 @@ namespace Tmm
             }
 
             /////////////////////////////////////////////////////////////////////
+
             public void AddFormatType(string s)
             {
                 if (comboBox.Items.Count == 1)
@@ -274,22 +276,52 @@ namespace Tmm
             InputDialog dlg = new InputDialog(text, title, true);
             dlg.SrcName = "変更前: " + src;
             dlg.DstName = " ";
- 
-            foreach (var v in Config.GetValues(@"tag"))
+
+            string res = null;
             {
-                dlg.AddListItem(v);
+                // OperatingSystem os = Environment.OSVersion;
+                // if ((os.Platform == PlatformID.Win32NT) && (os.Version.Major >= 5)) {
+                //     JobName = @"Global\" + JobName;
+                // }
+                // using (mutexObject = new Mutex(false, JobName)) {
+                //     if (!mutexObject.WaitOne(60000, true)) {
+                //         MessageBox.Show("すでに起動しています。2つ同時には起動できません。\n" + JobName, 
+                //             AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //         mutexObject.Close();
+                //         return res;
+                //     }
+                    try
+                    {
+                        foreach (var v in Config.GetValues(@"tag"))
+                        {
+                            dlg.AddListItem(v);
+                        }
+                        dlg.AddText("");
+                        if (tag != null)
+                        {
+                            if (tag.Length > 0) dlg.AddText(tag);
+                        }
+                        foreach (var v in Config.GetValues(@"tag\recent"))
+                        {
+                            dlg.AddText(v);
+                        }
+                        dlg.Value = tag;
+                        if (dlg.ShowDialog() == DialogResult.OK)
+                        {
+                            res = dlg.Value;
+                        }
+                    }
+                    catch
+                    {
+                        MessageBox.Show("operation error.", 
+                            AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                //     mutexObject.ReleaseMutex();
+                // }
+                // mutexObject.Close();
+                // Thread.Sleep(100000);
             }
-            dlg.AddText("");
-            foreach (var v in Config.GetValues(@"tag\recent"))
-            {
-                dlg.AddText(v);
-            }
-            dlg.Value = tag;
-            if (dlg.ShowDialog() == DialogResult.OK)
-            {
-                return dlg.Value;
-            }
-            return null;
+            return res;
         }
 
         /////////////////////////////////////////////////////////////////////
@@ -303,24 +335,56 @@ namespace Tmm
         {
             string title = "indexed";
             string text = "コメントを入れてください。";
-            InputDialog dlg = new InputDialog(text, title, true);
+            InputDialog dlg = new InputDialog(text, title, false);
             dlg.SrcName = "変更前: " + src;
             dlg.DstName = " ";
 
-            foreach (var v in Config.GetValues(@"note"))
+            string res = null;
             {
-                dlg.AddListItem(v);
+                // OperatingSystem os = Environment.OSVersion;
+                // if ((os.Platform == PlatformID.Win32NT) && (os.Version.Major >= 5)) {
+                //     JobName = @"Global\" + JobName;
+                // }
+                // using (mutexObject = new Mutex(false, JobName)) {
+                //     if (!mutexObject.WaitOne(60000, true)) {
+                //         MessageBox.Show("すでに起動しています。2つ同時には起動できません。\n" + JobName, 
+                //             AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //         mutexObject.Close();
+                //         return res;
+                //     }
+                    try
+                    {
+                        foreach (var v in Config.GetValues(@"note"))
+                        {
+                            dlg.AddListItem(v);
+                        }
+                        dlg.AddText("");
+                        if (comment != null) {
+                            if (comment.Length > 0) {
+                                dlg.AddText(comment);
+                            }
+                        }
+                        foreach (var v in Config.GetValues(@"note\recent"))
+                        {
+                            dlg.AddText(v);
+                        }
+                        dlg.Value = comment;
+                        if (dlg.ShowDialog() == DialogResult.OK)
+                        {
+                            return dlg.Value;
+                        }
+                    }
+                    catch
+                    {
+                        MessageBox.Show("operation error.", 
+                            AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                //     mutexObject.ReleaseMutex();
+                // }
+                // mutexObject.Close();
+                // Thread.Sleep(100000);
             }
-            dlg.AddText("");
-            foreach (var v in Config.GetValues(@"note\recent"))
-            {
-                dlg.AddText(v);
-            }
-            if (dlg.ShowDialog() == DialogResult.OK)
-            {
-                return dlg.Value;
-            }
-            return null;
+            return res;
         }
 
         /////////////////////////////////////////////////////////////////////
