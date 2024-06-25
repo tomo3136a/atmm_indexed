@@ -117,7 +117,7 @@ namespace Tmm
         /// <param name="src"></param>
         /// <param name="index"></param>
         /// <returns></returns>
-        public FileInfo Indexed(FileInfo src, string index, int n_rev, bool move=true)
+        public FileInfo Indexed(FileInfo src, string index, int n_rev, int level=0, bool move=true)
         {
             if (! SetSource(src.Name, src.Length, src.LastWriteTime.Ticks))
             {
@@ -125,21 +125,28 @@ namespace Tmm
                 return null;
             }
             SetIndex(index, n_rev);
-            string search = GetSearchName();
-            foreach (FileInfo fi in src.Directory.GetFiles(search))
+            if (level == 1)
             {
-                if (!NextIndexedItem(fi, src.Name))
-                {
-                    return null;
-                }
+                SetIndex("", 0);
             }
-            foreach (DirectoryInfo di in src.Directory.GetDirectories(backup_name))
+            else
             {
-                foreach (FileInfo fi in di.GetFiles(search))
+                string search = GetSearchName();
+                foreach (FileInfo fi in src.Directory.GetFiles(search))
                 {
                     if (!NextIndexedItem(fi, src.Name))
                     {
                         return null;
+                    }
+                }
+                foreach (DirectoryInfo di in src.Directory.GetDirectories(backup_name))
+                {
+                    foreach (FileInfo fi in di.GetFiles(search))
+                    {
+                        if (!NextIndexedItem(fi, src.Name))
+                        {
+                            return null;
+                        }
                     }
                 }
             }
@@ -156,7 +163,19 @@ namespace Tmm
                     src.CopyTo(s);
                 }
             }
-            dst.Attributes |= FileAttributes.ReadOnly;
+            else
+            {
+                MessageBox.Show("既にファイルがあります。: "+src.Name);
+                return null;
+            }
+            if (level == 1)
+            {
+                dst.Attributes &= ~FileAttributes.ReadOnly;
+            }
+            else
+            {
+                dst.Attributes |= FileAttributes.ReadOnly;
+            }
             return dst;
         }
 

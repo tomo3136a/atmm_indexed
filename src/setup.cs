@@ -14,9 +14,19 @@ namespace Tmm
             var regkey  = cu.CreateSubKey(@"Software\Classes\*\shell\at_2_snapshot");
             regkey.SetValue("MUIVerb", "スナップショット(&H)");
             regkey.SetValue("Description", "日付を付けたファイルを作成します。");
+            regkey.SetValue("AppliesTo", "NOT system.filename:~\"*_20??????*\"");
             regkey.Close();
             regkey = cu.CreateSubKey(@"Software\Classes\*\shell\at_2_snapshot\command");
             regkey.SetValue("", "\"" + path + "\" -s \"%V\"");
+            regkey.Close();
+
+            regkey  = cu.CreateSubKey(@"Software\Classes\*\shell\at_2_snapshot2");
+            regkey.SetValue("MUIVerb", "日付削除(&H)");
+            regkey.SetValue("Description", "ファイルから日付を削除します。");
+            regkey.SetValue("AppliesTo", "system.filename:~\"*_20??????*\"");
+            regkey.Close();
+            regkey = cu.CreateSubKey(@"Software\Classes\*\shell\at_2_snapshot2\command");
+            regkey.SetValue("", "\"" + path + "\" -s1 \"%V\"");
             regkey.Close();
 
             regkey = cu.CreateSubKey(@"Software\Classes\*\shell\at_3_restore");
@@ -182,6 +192,7 @@ namespace Tmm
         {
             var cu = Registry.CurrentUser;
             cu.DeleteSubKeyTree(@"Software\Classes\*\shell\at_2_snapshot", true);
+            cu.DeleteSubKeyTree(@"Software\Classes\*\shell\at_2_snapshot2", true);
             cu.DeleteSubKeyTree(@"Software\Classes\*\shell\at_3_restore", true);
             cu.DeleteSubKeyTree(@"Software\Classes\*\shell\at_4_backup", true);
             cu.DeleteSubKeyTree(@"Software\Classes\*\shell\at_8_tagging", true);

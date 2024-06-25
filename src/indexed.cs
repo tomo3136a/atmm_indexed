@@ -116,11 +116,11 @@ namespace Tmm
                 if (HasMode(Mode.IndexedMode))
                 {
                     im.SetMode(1);
-                    src = im.Indexed(src, index, 0, false);
+                    src = im.Indexed(src, index, 0, _level, false);
                 }
                 else if (HasMode(Mode.SnapshotMode))
                 {
-                    src = im.Indexed(src, index, 0, false);
+                    src = im.Indexed(src, index, 0, _level, false);
                 }
                 if (null == src) return null;
                 //action backup/restore
