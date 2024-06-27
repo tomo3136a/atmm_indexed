@@ -17,8 +17,29 @@ namespace Tmm
                     string v = (string)rkey.GetValue("" + k);
                     lst.Add(v.Trim());
                 }
+                rkey.Close();
             }
             return lst;
+        }
+
+        public static string GetValue(string kw, string name)
+        {
+            var skey = @"SOFTWARE\Classes\atmm\" + kw;
+            var rkey = Registry.CurrentUser.OpenSubKey(skey);
+            var res = "";
+            if (rkey != null) {
+                res = (string)rkey.GetValue(name);
+                rkey.Close();
+            }
+            return res;
+        }
+
+        public static void SetValue(string kw, string name, string val)
+        {
+            var skey = @"SOFTWARE\Classes\atmm\" + kw;
+            var rkey = Registry.CurrentUser.OpenSubKey(skey, true);
+            rkey.SetValue(name, val);
+            rkey.Close();
         }
 
         public static void AddValue(string kw, string s)
@@ -56,6 +77,7 @@ namespace Tmm
                     rkey.SetValue("", ks);
                     rkey.SetValue(k, s);
                 }
+                rkey.Close();
             }
         }
     }

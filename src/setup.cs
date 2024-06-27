@@ -64,7 +64,7 @@ namespace Tmm
             regkey.SetValue("", "\"" + path + "\" -c \"%V\"");
             regkey.Close();
 
-          regkey = cu.CreateSubKey(@"Software\Classes\*\shell\at_9_test");
+            regkey = cu.CreateSubKey(@"Software\Classes\*\shell\at_9_test");
             regkey.SetValue("MUIVerb", "テスト");
             regkey.SetValue("Extended", "");
             regkey.Close();

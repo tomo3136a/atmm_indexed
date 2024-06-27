@@ -278,48 +278,31 @@ namespace Tmm
             dlg.DstName = " ";
 
             string res = null;
+            try
             {
-                // OperatingSystem os = Environment.OSVersion;
-                // if ((os.Platform == PlatformID.Win32NT) && (os.Version.Major >= 5)) {
-                //     JobName = @"Global\" + JobName;
-                // }
-                // using (mutexObject = new Mutex(false, JobName)) {
-                //     if (!mutexObject.WaitOne(60000, true)) {
-                //         MessageBox.Show("すでに起動しています。2つ同時には起動できません。\n" + JobName, 
-                //             AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                //         mutexObject.Close();
-                //         return res;
-                //     }
-                    try
-                    {
-                        foreach (var v in Config.GetValues(@"tag"))
-                        {
-                            dlg.AddListItem(v);
-                        }
-                        dlg.AddText("");
-                        if (tag != null)
-                        {
-                            if (tag.Length > 0) dlg.AddText(tag);
-                        }
-                        foreach (var v in Config.GetValues(@"tag\recent"))
-                        {
-                            dlg.AddText(v);
-                        }
-                        dlg.Value = tag;
-                        if (dlg.ShowDialog() == DialogResult.OK)
-                        {
-                            res = dlg.Value;
-                        }
-                    }
-                    catch
-                    {
-                        MessageBox.Show("operation error.", 
-                            AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                //     mutexObject.ReleaseMutex();
-                // }
-                // mutexObject.Close();
-                // Thread.Sleep(100000);
+                foreach (var v in Config.GetValues(@"tag"))
+                {
+                    dlg.AddListItem(v);
+                }
+                dlg.AddText("");
+                if (tag != null)
+                {
+                    if (tag.Length > 0) dlg.AddText(tag);
+                }
+                foreach (var v in Config.GetValues(@"tag\recent"))
+                {
+                    dlg.AddText(v);
+                }
+                dlg.Value = tag;
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    res = dlg.Value;
+                }
+            }
+            catch
+            {
+                MessageBox.Show("operation error. TaggingDialog", 
+                    AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             return res;
         }
@@ -340,49 +323,32 @@ namespace Tmm
             dlg.DstName = " ";
 
             string res = null;
+            try
             {
-                // OperatingSystem os = Environment.OSVersion;
-                // if ((os.Platform == PlatformID.Win32NT) && (os.Version.Major >= 5)) {
-                //     JobName = @"Global\" + JobName;
-                // }
-                // using (mutexObject = new Mutex(false, JobName)) {
-                //     if (!mutexObject.WaitOne(60000, true)) {
-                //         MessageBox.Show("すでに起動しています。2つ同時には起動できません。\n" + JobName, 
-                //             AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                //         mutexObject.Close();
-                //         return res;
-                //     }
-                    try
-                    {
-                        foreach (var v in Config.GetValues(@"note"))
-                        {
-                            dlg.AddListItem(v);
-                        }
-                        dlg.AddText("");
-                        if (comment != null) {
-                            if (comment.Length > 0) {
-                                dlg.AddText(comment);
-                            }
-                        }
-                        foreach (var v in Config.GetValues(@"note\recent"))
-                        {
-                            dlg.AddText(v);
-                        }
-                        dlg.Value = comment;
-                        if (dlg.ShowDialog() == DialogResult.OK)
-                        {
-                            return dlg.Value;
-                        }
+                foreach (var v in Config.GetValues(@"note"))
+                {
+                    dlg.AddListItem(v);
+                }
+                dlg.AddText("");
+                if (comment != null) {
+                    if (comment.Length > 0) {
+                        dlg.AddText(comment);
                     }
-                    catch
-                    {
-                        MessageBox.Show("operation error.", 
-                            AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                //     mutexObject.ReleaseMutex();
-                // }
-                // mutexObject.Close();
-                // Thread.Sleep(100000);
+                }
+                foreach (var v in Config.GetValues(@"note\recent"))
+                {
+                    dlg.AddText(v);
+                }
+                dlg.Value = comment;
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    return dlg.Value;
+                }
+            }
+            catch
+            {
+                MessageBox.Show("operation error.", 
+                    AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             return res;
         }

@@ -181,13 +181,56 @@ namespace Tmm
             public static string CommentProc(ItemManager im, string comment)
             {
                 var src = im.FileName;
-                return CommentDialog(comment, src);
+                string res = "";
+                using (mutexObject = new Mutex(false, JobName))
+                {
+                    if (!mutexObject.WaitOne(100, true))
+                    {
+                        if (!mutexObject.WaitOne(100000, true))
+                        {
+                            MessageBox.Show("error: "+res);
+                            mutexObject.Close();
+                            return res;
+                        }
+                        res = Config.GetValue(@"current", "tag");
+                    }
+                    else
+                    {
+                        res = CommentDialog(comment, src);
+                        Config.SetValue(@"current", "tag", res);
+                    }
+                    mutexObject.ReleaseMutex();
+                }
+                mutexObject.Close();
+                return res;
             }
 
             public static string TaggingProc(ItemManager im, string tag)
             {
                 var src = im.FileName;
-                return TaggingDialog(tag, src);
+                string res = "";
+                using (mutexObject = new Mutex(false, JobName))
+                {
+                    if (!mutexObject.WaitOne(100, true))
+                    {
+                        if (!mutexObject.WaitOne(100000, true))
+                        {
+                            MessageBox.Show("すでに起動しています。2つ同時には起動できません。\n" + JobName, 
+                                AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            mutexObject.Close();
+                            return res;
+                        }
+                        res = Config.GetValue(@"current", "tag");
+                    }
+                    else
+                    {
+                        res = TaggingDialog(tag, src);
+                        Config.SetValue(@"current", "tag", res);
+                    }
+                    mutexObject.ReleaseMutex();
+                }
+                mutexObject.Close();
+                return res;
             }
 
             /// <summary>
@@ -482,9 +525,9 @@ namespace Tmm
         /////////////////////////////////////////////////////////////////////
         //main
 
-        // private static string JobName = "indexedapp";
+        private static string JobName = "indexedapp";
         private static string AppName = "indexed";
-        // private static Mutex mutexObject;
+        private static Mutex mutexObject;
 
         /// <summary>
         ///main process
@@ -493,10 +536,10 @@ namespace Tmm
         [STAThread]
         public static void Main(string[] args)
         {
-            // OperatingSystem os = Environment.OSVersion;
-            // if ((os.Platform == PlatformID.Win32NT) && (os.Version.Major >= 5)) {
-            //     JobName = @"Global\" + JobName;
-            // }
+            OperatingSystem os = Environment.OSVersion;
+            if ((os.Platform == PlatformID.Win32NT) && (os.Version.Major >= 5)) {
+                JobName = @"Global\" + JobName;
+            }
             // using (mutexObject = new Mutex(false, JobName)) {
             //     if (!mutexObject.WaitOne(60000, true)) {
             //         MessageBox.Show("すでに起動しています。2つ同時には起動できません。\n" + JobName, 
