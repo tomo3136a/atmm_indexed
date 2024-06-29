@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Windows.Forms;
-// using System.Security.Cryptography;
 
 namespace Tmm
 {
