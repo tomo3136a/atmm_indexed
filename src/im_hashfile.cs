@@ -38,7 +38,7 @@ namespace Tmm
             }
             using (var file = new StreamWriter(hash_path, bAppend))
             {
-                file.WriteLineAsync(hash + "  " + name);
+                file.WriteLineAsync(hash + " *" + name);
             }
         }
 
@@ -60,6 +60,7 @@ namespace Tmm
                     var name = line.Substring(sep).Trim();
                     name = name.Replace('*', ' ');
                     name = name.Replace('/', '\\');
+                    name = name.Trim();
                     var file = new FileInfo(name);
                     name = file.Name;
                     col[name] = hash;
@@ -112,7 +113,7 @@ namespace Tmm
                     var hash = GetFileHash(fi.FullName);
                     using (var fo = new StreamWriter(hash_file.FullName, true))
                     {
-                        fo.WriteLineAsync(hash + "  " + fi.Name);
+                        fo.WriteLineAsync(hash + " *" + fi.Name);
                     }
                 }
             }
