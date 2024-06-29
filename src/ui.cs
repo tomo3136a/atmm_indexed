@@ -229,6 +229,31 @@ namespace Tmm
                 listBox.Items.Add(s);
             }
 
+            public void UpdateList(string kw, string val)
+            {
+                foreach (var v in Config.GetValues(kw))
+                {
+                    AddListItem(v);
+                }
+                AddText("");
+                var flg = false;
+                foreach (var v in Config.GetValues(kw + @"\recent"))
+                {
+                    if (v != val) flg= true;
+                }
+                if (! flg)
+                {
+                    if (val != null)
+                    {
+                        if (val.Length > 0) AddText(val);
+                    }
+                }
+                foreach (var v in Config.GetValues(kw + @"\recent"))
+                {
+                    AddText(v);
+                }
+            }
+
             /////////////////////////////////////////////////////////////////////
 
             public void AddFormatType(string s)
@@ -263,7 +288,7 @@ namespace Tmm
         }
 
         /////////////////////////////////////////////////////////////////////
-
+        ///
         /// <summary>
         /// tag input dialog
         /// </summary>
@@ -280,19 +305,28 @@ namespace Tmm
             string res = null;
             try
             {
-                foreach (var v in Config.GetValues(@"tag"))
-                {
-                    dlg.AddListItem(v);
-                }
-                dlg.AddText("");
-                if (tag != null)
-                {
-                    if (tag.Length > 0) dlg.AddText(tag);
-                }
-                foreach (var v in Config.GetValues(@"tag\recent"))
-                {
-                    dlg.AddText(v);
-                }
+                dlg.UpdateList(@"tag", tag);
+                // foreach (var v in Config.GetValues(@"tag"))
+                // {
+                //     dlg.AddListItem(v);
+                // }
+                // dlg.AddText("");
+                // var flg = false;
+                // foreach (var v in Config.GetValues(@"tag\recent"))
+                // {
+                //     if (v != tag) flg= true;
+                // }
+                // if (! flg)
+                // {
+                //     if (tag != null)
+                //     {
+                //         if (tag.Length > 0) dlg.AddText(tag);
+                //     }
+                // }
+                // foreach (var v in Config.GetValues(@"tag\recent"))
+                // {
+                //     dlg.AddText(v);
+                // }
                 dlg.Value = tag;
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
@@ -325,20 +359,21 @@ namespace Tmm
             string res = null;
             try
             {
-                foreach (var v in Config.GetValues(@"note"))
-                {
-                    dlg.AddListItem(v);
-                }
-                dlg.AddText("");
-                if (comment != null) {
-                    if (comment.Length > 0) {
-                        dlg.AddText(comment);
-                    }
-                }
-                foreach (var v in Config.GetValues(@"note\recent"))
-                {
-                    dlg.AddText(v);
-                }
+                dlg.UpdateList(@"note", comment);
+                // foreach (var v in Config.GetValues(@"note"))
+                // {
+                //     dlg.AddListItem(v);
+                // }
+                // dlg.AddText("");
+                // if (comment != null) {
+                //     if (comment.Length > 0) {
+                //         dlg.AddText(comment);
+                //     }
+                // }
+                // foreach (var v in Config.GetValues(@"note\recent"))
+                // {
+                //     dlg.AddText(v);
+                // }
                 dlg.Value = comment;
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
