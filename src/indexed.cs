@@ -189,16 +189,24 @@ namespace Tmm
                     {
                         if (!mutexObject.WaitOne(100000, true))
                         {
-                            MessageBox.Show("error: "+res);
+                            MessageBox.Show("タイムアウトしました。\n" + JobName, 
+                                AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                             mutexObject.Close();
                             return res;
                         }
-                        res = Config.GetValue(@"current", "tag");
+                        res = Config.GetValue(@"current", "note");
                     }
                     else
                     {
                         res = CommentDialog(comment, src);
-                        Config.SetValue(@"current", "tag", res);
+                        if (res == null)
+                        {
+                            Config.RemoveValue(@"current", "note");
+                        }
+                        else
+                        {
+                            Config.SetValue(@"current", "note", res);
+                        }
                     }
                     mutexObject.ReleaseMutex();
                 }
@@ -216,7 +224,7 @@ namespace Tmm
                     {
                         if (!mutexObject.WaitOne(100000, true))
                         {
-                            MessageBox.Show("すでに起動しています。2つ同時には起動できません。\n" + JobName, 
+                            MessageBox.Show("タイムアウトしました。\n" + JobName, 
                                 AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                             mutexObject.Close();
                             return res;
@@ -226,7 +234,14 @@ namespace Tmm
                     else
                     {
                         res = TaggingDialog(tag, src);
-                        Config.SetValue(@"current", "tag", res);
+                        if (res == null)
+                        {
+                            Config.RemoveValue(@"current", "tag");
+                        }
+                        else
+                        {
+                            Config.SetValue(@"current", "tag", res);
+                        }
                     }
                     mutexObject.ReleaseMutex();
                 }
@@ -544,26 +559,15 @@ namespace Tmm
             if ((os.Platform == PlatformID.Win32NT) && (os.Version.Major >= 5)) {
                 JobName = @"Global\" + JobName;
             }
-            // using (mutexObject = new Mutex(false, JobName)) {
-            //     if (!mutexObject.WaitOne(60000, true)) {
-            //         MessageBox.Show("すでに起動しています。2つ同時には起動できません。\n" + JobName, 
-            //             AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //         mutexObject.Close();
-            //         return;
-            //     }
-                try
-                {
-                    AppMain(args);
-                }
-                catch
-                {
-                    MessageBox.Show("operation error.", 
-                        AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            //     mutexObject.ReleaseMutex();
-            // }
-            // mutexObject.Close();
-            // Thread.Sleep(5000);
+            try
+            {
+                AppMain(args);
+            }
+            catch
+            {
+                MessageBox.Show("operation error.", 
+                    AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         ///

@@ -26,14 +26,12 @@ namespace Tmm
                 FileNameShow();
             }
             string s = (myCallBack == null) ? _note : myCallBack(this, _note);
-            if (s != null)
-            {
-                _note = s.Trim().TrimStart(new char[]{'_'});
-                UpdateNote(_note);
-                s = BuildName();
-                src.MoveTo(s);
-                src = new FileInfo(s);
-            }
+            if (s == null) return null;
+            _note = s.Trim().TrimStart(new char[]{'_'});
+            UpdateNote(_note);
+            s = BuildName();
+            src.MoveTo(s);
+            src = new FileInfo(s);
             return src;
         }
 
@@ -50,14 +48,12 @@ namespace Tmm
                 FileNameShow();
             }
             string s = (myCallBack == null) ? _note : myCallBack(this, _note);
-            if (s != null)
-            {
-                _note = s.Trim().TrimStart(new char[]{'_'});
-                UpdateNote(_note);
-                s = BuildName();
-                src.MoveTo(s);
-                src = new DirectoryInfo(s);
-            }
+            if (s == null) return null;
+            _note = s.Trim().TrimStart(new char[]{'_'});
+            UpdateNote(_note);
+            s = BuildName();
+            src.MoveTo(s);
+            src = new DirectoryInfo(s);
             return src;
         }
 
@@ -78,14 +74,12 @@ namespace Tmm
             }
             string s = TrimTag(_tag);
             s = (myCallBack == null) ? s : myCallBack(this, s);
-            if (s != null)
-            {
-                _tag = BuildTagName(s);
-                UpdateTag(_tag);
-                s = BuildName();
-                src.MoveTo(s);
-                src = new FileInfo(s);
-            }
+            if (s == null) return null;
+            _tag = BuildTagName(s);
+            UpdateTag(_tag);
+            s = BuildName();
+            src.MoveTo(s);
+            src = new FileInfo(s);
             return src;
         }
 
@@ -103,14 +97,12 @@ namespace Tmm
             }
             string s = TrimTag(_tag);
             s = (myCallBack == null) ? s : myCallBack(this, s);
-            if (s != null)
-            {
-                _tag = BuildTagName(s);
-                UpdateTag(_tag);
-                s = BuildName();
-                src.MoveTo(s);
-                src = new DirectoryInfo(s);
-            }
+            if (s == null) return null;
+            _tag = BuildTagName(s);
+            UpdateTag(_tag);
+            s = BuildName();
+            src.MoveTo(s);
+            src = new DirectoryInfo(s);
             return src;
         }
 

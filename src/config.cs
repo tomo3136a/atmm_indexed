@@ -42,6 +42,20 @@ namespace Tmm
             rkey.Close();
         }
 
+        public static void RemoveValue(string kw, string name)
+        {
+            var skey = @"SOFTWARE\Classes\atmm\" + kw;
+            var rkey = Registry.CurrentUser.OpenSubKey(skey, true);
+            try
+            {
+                rkey.DeleteValue(name);
+            }
+            catch
+            {
+            }
+            rkey.Close();
+        }
+
         public static void AddValue(string kw, string s)
         {
             var skey = @"SOFTWARE\Classes\atmm\" + kw;

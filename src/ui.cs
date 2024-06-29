@@ -143,13 +143,13 @@ namespace Tmm
                 this.Close();
             }
 
-            void on_change(Object sender, EventArgs e)
-            {
-                var cb = (ComboBox)sender;
-                cb.SelectionLength = 0;
-                cb.SelectionStart = cb.Text.Length;
-                cb.SelectionLength = 0;
-            }
+            // void on_change(Object sender, EventArgs e)
+            // {
+            //     var cb = (ComboBox)sender;
+            //     cb.SelectionLength = 0;
+            //     cb.SelectionStart = cb.Text.Length;
+            //     cb.SelectionLength = 0;
+            // }
 
             void on_changed(Object sender, EventArgs e)
             {
@@ -303,27 +303,6 @@ namespace Tmm
             try
             {
                 dlg.UpdateList(@"tag", tag);
-                // foreach (var v in Config.GetValues(@"tag"))
-                // {
-                //     dlg.AddListItem(v);
-                // }
-                // dlg.AddText("");
-                // var flg = false;
-                // foreach (var v in Config.GetValues(@"tag\recent"))
-                // {
-                //     if (v != tag) flg= true;
-                // }
-                // if (! flg)
-                // {
-                //     if (tag != null)
-                //     {
-                //         if (tag.Length > 0) dlg.AddText(tag);
-                //     }
-                // }
-                // foreach (var v in Config.GetValues(@"tag\recent"))
-                // {
-                //     dlg.AddText(v);
-                // }
                 dlg.Value = tag;
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
@@ -357,20 +336,6 @@ namespace Tmm
             try
             {
                 dlg.UpdateList(@"note", comment);
-                // foreach (var v in Config.GetValues(@"note"))
-                // {
-                //     dlg.AddListItem(v);
-                // }
-                // dlg.AddText("");
-                // if (comment != null) {
-                //     if (comment.Length > 0) {
-                //         dlg.AddText(comment);
-                //     }
-                // }
-                // foreach (var v in Config.GetValues(@"note\recent"))
-                // {
-                //     dlg.AddText(v);
-                // }
                 dlg.Value = comment;
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
