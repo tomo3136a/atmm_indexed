@@ -9,9 +9,31 @@ namespace Tmm
         static void InstallReg()
         {
             var path = Assembly.GetExecutingAssembly().Location;
-
             var cu = Registry.CurrentUser;
-            var regkey  = cu.CreateSubKey(@"Software\Classes\*\shell\at_2_snapshot");
+
+            var regkey = cu.CreateSubKey(@"Software\Classes\atmm");
+            regkey.SetValue("", "Advainced T's Manipulator Modules");
+            regkey.Close();
+            regkey = cu.CreateSubKey(@"Software\Classes\atmm\current");
+            regkey.SetValue("", "");
+            regkey.Close();
+            regkey = cu.CreateSubKey(@"Software\Classes\atmm\tag");
+            regkey.SetValue("", "abc");
+            regkey.SetValue("a", "参考");
+            regkey.SetValue("b", "編集中");
+            regkey.SetValue("c", "破棄");
+            regkey.Close();
+            regkey = cu.CreateSubKey(@"Software\Classes\atmm\tag\recent");
+            regkey.SetValue("", "");
+            regkey.Close();
+            regkey = cu.CreateSubKey(@"Software\Classes\atmm\note");
+            regkey.SetValue("", "");
+            regkey.Close();
+            regkey = cu.CreateSubKey(@"Software\Classes\atmm\note\recent");
+            regkey.SetValue("", "");
+            regkey.Close();
+
+            regkey  = cu.CreateSubKey(@"Software\Classes\*\shell\at_2_snapshot");
             regkey.SetValue("MUIVerb", "スナップショット(&H)");
             regkey.SetValue("Description", "日付を付けたファイルを作成します。");
             regkey.SetValue("AppliesTo", "NOT system.filename:~\"*_20??????*\"");
@@ -62,14 +84,6 @@ namespace Tmm
             regkey.Close();
             regkey = cu.CreateSubKey(@"Software\Classes\*\shell\at_9_comment\command");
             regkey.SetValue("", "\"" + path + "\" -c \"%V\"");
-            regkey.Close();
-
-            regkey = cu.CreateSubKey(@"Software\Classes\*\shell\at_9_test");
-            regkey.SetValue("MUIVerb", "テスト");
-            regkey.SetValue("Extended", "");
-            regkey.Close();
-            regkey = cu.CreateSubKey(@"Software\Classes\*\shell\at_9_test\command");
-            regkey.SetValue("", "\"" + path + "\" -y \"%V\"");
             regkey.Close();
 
             regkey = cu.CreateSubKey(@"Software\Classes\Directory\shell\at_1_datefolder");
@@ -141,6 +155,21 @@ namespace Tmm
             regkey.SetValue("", "\"" + path + "\" -h");
             regkey.Close();
 
+            regkey = cu.CreateSubKey(@"Software\Classes\*\shell\at_9_monitor");
+            regkey.SetValue("MUIVerb", "モニタ登録");
+            regkey.SetValue("Extended", "");
+            regkey.Close();
+            regkey = cu.CreateSubKey(@"Software\Classes\*\shell\at_9_monitor\command");
+            regkey.SetValue("", "\"" + path + "\" -m \"%V\"");
+            regkey.Close();
+
+            regkey = cu.CreateSubKey(@"Software\Classes\hashfile\shell\test");
+            regkey.SetValue("MUIVerb", "ハッシュ値テスト(&H)");
+            regkey.SetValue("Description", "ハッシュ値をテストする。");
+            regkey.Close();
+            regkey = cu.CreateSubKey(@"Software\Classes\hashfile\shell\test\command");
+            regkey.SetValue("", "\"" + path + "\" -h \"%V\"");
+            regkey.Close();
             regkey = cu.CreateSubKey(@"Software\Classes\.sum");
             regkey.SetValue("", "hashfile");
             regkey = cu.CreateSubKey(@"Software\Classes\.md5");
@@ -153,13 +182,6 @@ namespace Tmm
             regkey.SetValue("", "hashfile");
             regkey = cu.CreateSubKey(@"Software\Classes\.sha512");
             regkey.SetValue("", "hashfile");
-            regkey = cu.CreateSubKey(@"Software\Classes\hashfile\shell\test");
-            regkey.SetValue("MUIVerb", "ハッシュ値テスト(&H)");
-            regkey.SetValue("Description", "ハッシュ値をテストする。");
-            regkey.Close();
-            regkey = cu.CreateSubKey(@"Software\Classes\hashfile\shell\test\command");
-            regkey.SetValue("", "\"" + path + "\" -h \"%V\"");
-            regkey.Close();
 
             regkey = cu.CreateSubKey(@"Software\Classes\.tmm");
             regkey.SetValue("", "atmm");
@@ -168,26 +190,8 @@ namespace Tmm
             regkey.SetValue("ItemName", @"@%SystemRoot%\system32\notepad.exe,-470");
             regkey.SetValue("", "\"" + path + "\" -d");
             regkey.Close();
-            regkey = cu.CreateSubKey(@"Software\Classes\atmm");
-            regkey.SetValue("", "Advainced T's Manipulator Modules");
-            regkey.Close();
-
-            regkey = cu.CreateSubKey(@"Software\Classes\atmm\tag");
-            regkey.SetValue("", "abc");
-            regkey.SetValue("a", "参考");
-            regkey.SetValue("b", "編集中");
-            regkey.SetValue("c", "破棄");
-            regkey.Close();
-            regkey = cu.CreateSubKey(@"Software\Classes\atmm\tag\recent");
-            regkey.SetValue("", "");
-            regkey.Close();
-            regkey = cu.CreateSubKey(@"Software\Classes\atmm\note");
-            regkey.SetValue("", "");
-            regkey.Close();
-            regkey = cu.CreateSubKey(@"Software\Classes\atmm\note\recent");
-            regkey.SetValue("", "");
-            regkey.Close();
         }
+
         static void UninstallReg()
         {
             var cu = Registry.CurrentUser;
@@ -197,6 +201,7 @@ namespace Tmm
             cu.DeleteSubKeyTree(@"Software\Classes\*\shell\at_4_backup", true);
             cu.DeleteSubKeyTree(@"Software\Classes\*\shell\at_8_tagging", true);
             cu.DeleteSubKeyTree(@"Software\Classes\*\shell\at_9_comment", true);
+            cu.DeleteSubKeyTree(@"Software\Classes\*\shell\at_9_monitor", true);
 
             cu.DeleteSubKeyTree(@"Software\Classes\Directory\shell\at_1_datefolder", true);
             cu.DeleteSubKeyTree(@"Software\Classes\Directory\shell\at_1_datefolder2", true);

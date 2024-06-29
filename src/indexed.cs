@@ -4,7 +4,7 @@
  * Command line options:
  *    -s  snapshot
  *    -d  date-indexed
- *    -b  backup/restore
+ *    -b  backup
  *    -r  restore
  *    -h  hashfile
  *    -o  checkout
@@ -15,6 +15,8 @@
  *    -p  program
  *    -z  archive
  *    -v  verbose
+ *    -u  update
+ *    -m  monitor
  *
  * 日付フォルダ管理
  *   1. フォルダを指定した場合
@@ -62,21 +64,24 @@ namespace Tmm
             public long StartTicks;
             public enum Mode
             {
-                SnapshotMode,
-                IndexedMode,
-                BackupMode,
-                RestoreMode,
-                HashFileMode,
-                CheckOutMode,
-                CheckInMode,
-                TaggingMode,
-                CommentMode,
-                FolderMode,
-                OpenMode,
-                ZipMode,
-                UpdateMode,
-                VerboseMode
+                SnapshotMode,       // s
+                IndexedMode,        // d
+                BackupMode,         // b
+                RestoreMode,        // r
+                HashFileMode,       // h
+                CheckOutMode,       // o
+                CheckInMode,        // i
+                TaggingMode,        // t
+                CommentMode,        // c
+                FolderMode,         // f
+                OpenMode,           // p
+                ZipMode,            // z
+                VerboseMode,        // v
+                UpdateMode,         // u
+                MonitorMode,        // m
+                ZzzMode
             };
+
             List<Mode> _mode = new List<Mode>();
 
             public string Comment;
@@ -498,6 +503,9 @@ namespace Tmm
                             break;
                         case 'u':   //update
                             ToggleMode(Mode.UpdateMode);
+                            break;
+                        case 'm':   //monitor
+                            ToggleMode(Mode.MonitorMode);
                             break;
                         case '1':   //level
                         case '2':   //level
