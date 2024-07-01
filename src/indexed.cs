@@ -11,7 +11,6 @@
  *    -i  checkin
  *    -t  tagging
  *    -c  add comment
- *    -f  folder open
  *    -p  program
  *    -z  archive
  *    -v  verbose
@@ -50,36 +49,135 @@ namespace Tmm
 {
     partial class Program
     {
+        /////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////
+        //main
 
-        /////////////////////////////////////////////////////////////////////
-        /////////////////////////////////////////////////////////////////////
+        private static string JobName = "indexedapp";
+        private static string AppName = "indexed";
+        private static Mutex mutexObject;
+
+        /// <summary>
+        ///main process
+        /// </summary>
+        /// <param name="args">file/folder path or options</param>
+        [STAThread]
+        public static void Main(string[] args)
+        {
+            OperatingSystem os = Environment.OSVersion;
+            if ((os.Platform == PlatformID.Win32NT) && (os.Version.Major >= 5)) {
+                JobName = @"Global\" + JobName;
+            }
+            try
+            {
+                AppMain(args);
+            }
+            catch
+            {
+                MessageBox.Show("operation error.", 
+                    AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// Applicaton Main
+        static void AppMain(string[] args)
+        {
+            ItemJob job = new ItemJob();
+            FileInfo src = null;
+
+            bool no_target = true;
+            foreach (string arg in args)
+            {
+                //option
+                if (job.IsOption(arg))
+                {
+                    if (job.ParseOption(arg))
+                    {
+                        continue;
+                    }
+                    MessageBox.Show("option error(" + arg + ")", 
+                        AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                //parent or name
+                string name = System.IO.Path.GetFileName(arg);
+                string path = arg.Substring(0, arg.Length - name.Length);
+                path = Path.GetFullPath((path.Length == 0) ? @".\" : path);
+                DirectoryInfo parent = new DirectoryInfo(path);
+
+                //target directory
+                foreach (DirectoryInfo di in parent.GetDirectories(name))
+                {
+                    if (0 != (di.Attributes & FileAttributes.System))
+                    {
+                        MessageBox.Show("not support system attribulte.\n" + di.Name, 
+                            AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        continue;
+                    }
+                    long ticks = ItemManager.GetLastTimeInFolder(di, job.StartTicks);
+                    string index = ItemManager.DateTimeFormat(ticks);
+                    if (null == job.ExecuteDirectory(di, index))
+                    {
+                        job.Verbose("stop operation. target directory.\n" + di.Name);
+                        return;
+                    }
+                    no_target = false;
+                }
+
+                //target file
+                foreach (FileInfo fi in parent.GetFiles(name))
+                {
+                    if ((fi.Attributes & FileAttributes.System) != 0)
+                    {
+                        MessageBox.Show("not support system file.\n" + fi.Name, 
+                            AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        continue;
+                    }
+                    long ticks = fi.LastWriteTime.Ticks;
+                    string index = ItemManager.DateTimeFormat(ticks);
+                    src = job.ExecuteFile(fi, index);
+                    if (null == src)
+                    {
+                        job.Verbose("stop operation. target file.\n" + fi.Name);
+                        return;
+                    }
+                    no_target = false;
+                }
+            }
+
+            //setup
+            if (job.HasMode(ItemJob.Mode.UpdateMode))
+            {
+                if (1 == job.GetLevel())
+                {
+                    UninstallReg();
+                    job.Verbose("uninstalled.");
+                }
+                else
+                {
+                    InstallReg();
+                    job.Verbose("installed.");
+                }
+                return;
+            }
+
+            //target directory background
+            if (no_target)
+            {
+                DirectoryInfo di = new DirectoryInfo(".");
+                string index = ItemManager.DateTimeFormat(job.StartTicks);
+                job.ExecuteBackground(di, index);
+                return;
+            }
+        }
+
         /////////////////////////////////////////////////////////////////////
 
         public class ItemJob
         {
             public long StartTicks;
-            public enum Mode
-            {
-                SnapshotMode,       // s
-                IndexedMode,        // d
-                BackupMode,         // b
-                RestoreMode,        // r
-                HashFileMode,       // h
-                CheckOutMode,       // o
-                CheckInMode,        // i
-                TaggingMode,        // t
-                CommentMode,        // c
-                FolderMode,         // f
-                OpenMode,           // p
-                ZipMode,            // z
-                VerboseMode,        // v
-                UpdateMode,         // u
-                MonitorMode,        // m
-                ZzzMode
-            };
-
-            List<Mode> _mode = new List<Mode>();
-
             public string Comment;
 
             /////////////////////////////////////////////////////////////////////
@@ -140,14 +238,56 @@ namespace Tmm
                     src = im.TestHashFile(src);
                 }
                 if (null == src) return null;
-                //action check-out/check-in
-                if (HasMode(Mode.CheckOutMode))
+                //action commment
+                if (HasMode(Mode.CommentMode))
                 {
-                    src = im.CheckOutFrom(src, _level, RenameProc);
+                    src = im.Comment(src, CommentProc);
                 }
-                else if (HasMode(Mode.CheckInMode))
+                if (null == src) return null;
+                //action tagging
+                if (HasMode(Mode.TaggingMode))
                 {
-                    src = im.CheckInTo(src, RenameProc);
+                    src = im.Tagging(src, TaggingProc);
+                }
+                if (null == src) return null;
+                //action monitor
+                if (HasMode(Mode.MonitorMode))
+                {
+                    src = im.Monitor(src, _level, MonitorProc);
+                }
+                if (null == src) return null;
+                return src;
+            }
+
+            /// <summary>
+            /// process of diectory
+            /// </summary>
+            /// <param name="src"></param>
+            /// <param name="index"></param>
+            /// <returns></returns>
+            public DirectoryInfo ExecuteDirectory(DirectoryInfo src, string index)
+            {
+                Verbose("ExecuteDirectory:\n  src  ="+src+"\n  index="+index);
+                ItemManager im = new ItemManager();
+                //action snapshot/date-indexed
+                if (HasMode(Mode.IndexedMode))
+                {
+                    im.SetMode(1);
+                    src = im.Indexed(src, index, 0, _level);
+                }
+                else if (HasMode(Mode.SnapshotMode))
+                {
+                    src = im.Indexed(src, index, 0, _level);
+                }
+                if (null == src) return null;
+                //action backup/restore
+                if (HasMode(Mode.BackupMode))
+                {
+                    src = im.BackupTo(src, RenameProc);
+                }
+                else if (HasMode(Mode.RestoreMode))
+                {
+                    src = im.RestoreFrom(src, RenameProc);
                 }
                 if (null == src) return null;
                 //action commment
@@ -161,8 +301,75 @@ namespace Tmm
                 {
                     src = im.Tagging(src, TaggingProc);
                 }
+                //action monitor
+                if (HasMode(Mode.MonitorMode))
+                {
+                    src = im.Monitor(src, _level, MonitorProc);
+                }
+                if (null == src) return null;
                 return src;
             }
+
+            /// <summary>
+            /// process of background
+            /// </summary>
+            /// <param name="dst"></param>
+            /// <param name="index"></param>
+            public void ExecuteBackground(DirectoryInfo dst, string index)
+            {
+                Verbose("ExecuteBackground:\n  src  ="+dst+"\n  index="+index);
+                if (HasMode(ItemJob.Mode.IndexedMode))
+                {
+                    InputDialog dlg = NewNameDialog("", index);
+                    string path = System.Environment.GetFolderPath(
+                        Environment.SpecialFolder.Personal);
+                    path = Path.Combine(path, "Templates");
+                    if (Directory.Exists(path))
+                    {
+                        DirectoryInfo di = new DirectoryInfo(path);
+                        foreach (FileInfo fi in di.GetFiles())
+                        {
+                            dlg.AddFormatType(fi.Name);
+                        }
+                    }
+                    if (dlg.ShowDialog() != DialogResult.OK)
+                    {
+                        return;
+                    }
+                    string name = ItemManager.RecommendName(dlg.Value);
+
+                    //
+                    ItemManager im = new ItemManager(1, index, 0);
+                    dst = im.NewIndexed(dst, name);
+
+                    string p = dst.FullName;
+                    string ft = dlg.FormatType;
+                    if (ft[0] != '<')
+                    {
+                        path = Path.Combine(path, ft);
+                        if (File.Exists(path))
+                        {
+                            FileInfo src = new FileInfo(path);
+                            name = src.Name.Replace("xxx", name);
+                            p = Path.Combine(dst.FullName, name);
+                            src.CopyTo(p);
+                        }
+                        if (HasMode(Mode.OpenMode))
+                        {
+                            System.Diagnostics.Process.Start(p);
+                        }
+                    }
+                }
+                //action hashfile
+                if (HasMode(Mode.HashFileMode))
+                {
+                    ItemManager im = new ItemManager(1, index, 0);
+                    im.CreateHashFile(dst);
+                }
+            }
+
+            /////////////////////////////////////////////////////////////////////
+            /// callback procedure
 
             public static string RenameProc(ItemManager im, string name)
             {
@@ -249,136 +456,46 @@ namespace Tmm
                 return res;
             }
 
-            /// <summary>
-            /// process of diectory
-            /// </summary>
-            /// <param name="src"></param>
-            /// <param name="index"></param>
-            /// <returns></returns>
-            public DirectoryInfo ExecuteDirectory(DirectoryInfo src, string index)
+            public static string MonitorProc(ItemManager im, string name)
             {
-                Verbose("ExecuteDirectory:\n  src  ="+src+"\n  index="+index);
-                ItemManager im = new ItemManager();
-                //action snapshot/date-indexed
-                if (HasMode(Mode.IndexedMode))
+                string res = "";
+                using (mutexObject = new Mutex(false, JobName))
                 {
-                    im.SetMode(1);
-                    src = im.Indexed(src, index, 0, _level);
-                }
-                else if (HasMode(Mode.SnapshotMode))
-                {
-                    src = im.Indexed(src, index, 0, _level);
-                }
-                if (null == src) return null;
-                //action backup/restore
-                if (HasMode(Mode.BackupMode))
-                {
-                    src = im.BackupTo(src, RenameProc);
-                }
-                else if (HasMode(Mode.RestoreMode))
-                {
-                    src = im.RestoreFrom(src, RenameProc);
-                }
-                if (null == src) return null;
-                //action commment
-                if (HasMode(Mode.CommentMode))
-                {
-                    src = im.Comment(src, CommentProc);
-                }
-                if (null == src) return null;
-                //action tagging
-                if (HasMode(Mode.TaggingMode))
-                {
-                    src = im.Tagging(src, TaggingProc);
-                }
-                return src;
-            }
-
-            /// <summary>
-            /// process of background
-            /// </summary>
-            /// <param name="dst"></param>
-            /// <param name="index"></param>
-            public void ExecuteBackground(DirectoryInfo dst, string index)
-            {
-                Verbose("ExecuteBackground:\n  src  ="+dst+"\n  index="+index);
-                if (HasMode(ItemJob.Mode.IndexedMode))
-                {
-                    InputDialog dlg = NewNameDialog("", index);
-                    string path = System.Environment.GetFolderPath(
-                        Environment.SpecialFolder.Personal);
-                    path = Path.Combine(path, "Templates");
-                    if (Directory.Exists(path))
+                    if (!mutexObject.WaitOne(1000, true))
                     {
-                        DirectoryInfo di = new DirectoryInfo(path);
-                        foreach (FileInfo fi in di.GetFiles())
-                        {
-                            dlg.AddFormatType(fi.Name);
-                        }
+                        MessageBox.Show("タイムアウトしました。\n" + JobName, 
+                            AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        mutexObject.Close();
+                        return res;
                     }
-                    if (dlg.ShowDialog() != DialogResult.OK)
-                    {
-                        return;
-                    }
-                    string name = ItemManager.RecommendName(dlg.Value);
-
-                    //
-                    ItemManager im = new ItemManager(1, index, 0);
-                    dst = im.NewIndexed(dst, name);
-
-                    string p = dst.FullName;
-                    // if (HasMode(Mode.FolderMode))
-                    // {
-                    //     MessageBox.Show("NO: name="+name+" index="+index);
-                    //     System.Diagnostics.Process.Start(p);
-                    // }
-
-                    //
-                    string ft = dlg.FormatType;
-                    if (ft[0] != '<')
-                    {
-                        path = Path.Combine(path, ft);
-                        if (File.Exists(path))
-                        {
-                            FileInfo src = new FileInfo(path);
-                            name = src.Name.Replace("xxx", name);
-                            p = Path.Combine(dst.FullName, name);
-                            src.CopyTo(p);
-                        }
-                        if (HasMode(Mode.OpenMode))
-                        {
-                            System.Diagnostics.Process.Start(p);
-                        }
-                    }
+                    res = im.AddMonitor(name);
+                    mutexObject.ReleaseMutex();
                 }
-                //action hashfile
-                if (HasMode(Mode.HashFileMode))
-                {
-                    ItemManager im = new ItemManager(1, index, 0);
-                    im.CreateHashFile(dst);
-                }
-            }
-
-            /// <summary>
-            /// post process
-            /// </summary>
-            /// <param name="src"></param>
-            public void ExecutePost(FileInfo src)
-            {
-                if (HasMode(Mode.FolderMode))
-                {
-                    string p = src.Directory.FullName;
-                    System.Diagnostics.Process.Start(p);
-                }
-                else if (HasMode(Mode.OpenMode))
-                {
-                    string p = src.FullName;
-                    System.Diagnostics.Process.Start(p);
-                }
+                mutexObject.Close();
+                return res;
             }
 
             /////////////////////////////////////////////////////////////////////
             // mode
+
+            public enum Mode
+            {
+                SnapshotMode,       // s
+                IndexedMode,        // d
+                BackupMode,         // b
+                RestoreMode,        // r
+                HashFileMode,       // h
+                TaggingMode,        // t
+                CommentMode,        // c
+                OpenMode,           // p
+                ZipMode,            // z
+                VerboseMode,        // v
+                UpdateMode,         // u
+                MonitorMode,        // m
+                ZzzMode
+            };
+
+            List<Mode> _mode = new List<Mode>();
 
             /// <summary>
             /// test mode
@@ -408,16 +525,6 @@ namespace Tmm
                 }
             }
 
-            int _level;
-            public void SetLevel(int level)
-            {
-                _level = level;
-            }
-            public int GetLevel()
-            {
-                return _level;
-            }
-
             public void ToggleMode(Mode mode)
             {
                 SetMode(mode, !HasMode(mode));
@@ -441,15 +548,17 @@ namespace Tmm
                 SetMode(Mode.IndexedMode);
             }
 
-            /// <summary>
-            /// verbose
-            /// </summary>
-            public void Verbose(string s)
+            /////////////////////////////////////////////////////////////////////
+            // level
+
+            int _level;
+            public void SetLevel(int level)
             {
-                if (HasMode(Mode.VerboseMode))
-                {
-                    MessageBox.Show(s, AppName);
-                }
+                _level = level;
+            }
+            public int GetLevel()
+            {
+                return _level;
             }
 
             /////////////////////////////////////////////////////////////////////
@@ -479,12 +588,6 @@ namespace Tmm
                         case 'd':   //indexed
                             ToggleMode(Mode.IndexedMode);
                             break;
-                        case 'o':   //checkout
-                            ToggleMode(Mode.CheckOutMode);
-                            break;
-                        case 'i':   //checkin
-                            ToggleMode(Mode.CheckInMode);
-                            break;
                         case 'b':   //backup
                             ToggleMode(Mode.BackupMode);
                             break;
@@ -499,9 +602,6 @@ namespace Tmm
                             break;
                         case 'c':   //comment
                             ToggleMode(Mode.CommentMode);
-                            break;
-                        case 'f':   //folder open
-                            ToggleMode(Mode.FolderMode);
                             break;
                         case 'p':   //program open
                             ToggleMode(Mode.OpenMode);
@@ -527,7 +627,7 @@ namespace Tmm
                         case '7':   //level
                         case '8':   //level
                         case '9':   //level
-                        case '0':   //level
+                        case '0':   //level(default)
                             SetLevel(Int32.Parse("" + c));
                             break;
                         default:
@@ -537,133 +637,20 @@ namespace Tmm
                 return true;
             }
 
-        }
+            /////////////////////////////////////////////////////////////////////
+            // verbose
 
-        /////////////////////////////////////////////////////////////////////
-        /////////////////////////////////////////////////////////////////////
-        /////////////////////////////////////////////////////////////////////
-        //main
-
-        private static string JobName = "indexedapp";
-        private static string AppName = "indexed";
-        private static Mutex mutexObject;
-
-        /// <summary>
-        ///main process
-        /// </summary>
-        /// <param name="args">file/folder path or options</param>
-        [STAThread]
-        public static void Main(string[] args)
-        {
-            OperatingSystem os = Environment.OSVersion;
-            if ((os.Platform == PlatformID.Win32NT) && (os.Version.Major >= 5)) {
-                JobName = @"Global\" + JobName;
-            }
-            try
+            /// <summary>
+            /// verbose
+            /// </summary>
+            public void Verbose(string s)
             {
-                AppMain(args);
-            }
-            catch
-            {
-                MessageBox.Show("operation error.", 
-                    AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        ///
-        static void AppMain(string[] args)
-        {
-            ItemJob job = new ItemJob();
-            FileInfo src = null;
-
-            bool no_target = true;
-            foreach (string arg in args)
-            {
-                //option
-                if (job.IsOption(arg))
+                if (HasMode(Mode.VerboseMode))
                 {
-                    if (job.ParseOption(arg))
-                    {
-                        continue;
-                    }
-                    MessageBox.Show("option error(" + arg + ")", 
-                        AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                //parent or name
-                string name = System.IO.Path.GetFileName(arg);
-                string path = arg.Substring(0, arg.Length - name.Length);
-                path = Path.GetFullPath((path.Length == 0) ? @".\" : path);
-                DirectoryInfo parent = new DirectoryInfo(path);
-
-                //target directory
-                foreach (DirectoryInfo di in parent.GetDirectories(name))
-                {
-                    if (0 != (di.Attributes & FileAttributes.System))
-                    {
-                        MessageBox.Show("not support system attribulte.\n" + di.Name, 
-                            AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        continue;
-                    }
-                    long ticks = ItemManager.GetLastTimeInFolder(di, job.StartTicks);
-                    string index = ItemManager.DateTimeFormat(ticks);
-                    if (null == job.ExecuteDirectory(di, index))
-                    {
-                        job.Verbose("stop operation. target directory.\n" + di.Name);
-                        return;
-                    }
-                    no_target = false;
-                }
-
-                //target file
-                foreach (FileInfo fi in parent.GetFiles(name))
-                {
-                    if ((fi.Attributes & FileAttributes.System) != 0)
-                    {
-                        MessageBox.Show("not support system file.\n" + fi.Name, AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        continue;
-                    }
-                    long ticks = fi.LastWriteTime.Ticks;
-                    string index = ItemManager.DateTimeFormat(ticks);
-                    src = job.ExecuteFile(fi, index);
-                    if (null == src)
-                    {
-                        job.Verbose("stop operation. target file.\n" + fi.Name);
-                        return;
-                    }
-                    no_target = false;
+                    MessageBox.Show(s, AppName);
                 }
             }
 
-            //setup
-            if (job.HasMode(ItemJob.Mode.UpdateMode))
-            {
-                if (1 == job.GetLevel())
-                {
-                    UninstallReg();
-                    job.Verbose("uninstalled.");
-                }
-                else
-                {
-                    InstallReg();
-                    job.Verbose("installed.");
-                }
-                return;
-            }
-
-            //target directory background
-            if (no_target)
-            {
-                DirectoryInfo di = new DirectoryInfo(".");
-                string index = ItemManager.DateTimeFormat(job.StartTicks);
-                job.ExecuteBackground(di, index);
-                return;
-            }
-            // if (src != null)
-            // {
-            //     job.ExecutePost(src);
-            // }
         }
     }
 }
