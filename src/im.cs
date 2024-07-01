@@ -113,6 +113,9 @@ namespace Tmm
         /// <returns></returns>
         static bool IsIgnoreName(string name)
         {
+            string s = name.Trim().Replace('<', '(').Replace('>', ')').Replace('=', '-');
+            if(Regex.IsMatch(name, @"-\s+コピー")) return true;
+
             string ptn = "~_.@";
             return ((name.Length > 0) &&
                     ((ptn.IndexOf(name[0]) >= 0) ||
