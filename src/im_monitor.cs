@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Threading;
+using System.Diagnostics;
 
 namespace Tmm
 {
@@ -141,6 +142,7 @@ namespace Tmm
             }
 
             string msg = "";
+            List<string> msgs = new List<string>();
             path = GetMonitorConfigPath();
             if (!File.Exists(path)) return;
             foreach (var line in File.ReadAllLines(path))
@@ -161,13 +163,17 @@ namespace Tmm
                     if (IsIgnoreName(fi.Name) == false)
                     {
                         string dt = fi.LastWriteTime.ToString("yyyy/MM/dd HH:mm:ss");
-                        last = (string.Compare(last, dt) < 0) ? dt : last;
-                        file = fi.Name;
+                        if (string.Compare(last, dt) < 0) {
+                            last = dt;
+                            file = fi.Name;
+                        }
                     }
                 }
-                if (string.Compare(last, date) != 0)
+                if (file.Length > 0)
                 {
-                    msg += "name=" + name + "\ndir=" + dir + "\nptn=" + ptn + "\ndate="+ date + " -> " + last + "\n" + file + "\n\n";
+                    //msg += "name=" + name + "\ndir=" + dir + "\nptn=" + ptn + "\ndate="+ date + " -> " + last + "\n" + file + "\n\n";
+                    msg += file + " ";
+                    msgs.Add(file);
                     dic[name] = last;
                 }
             }
@@ -184,7 +190,24 @@ namespace Tmm
                         append = true;
                     }
                 }
+                ToastOut(msg);
             }
+        }
+
+        static void ToastOut(string msg)
+        {
+            string s = @"$msg = '" + msg + @"'; ";
+            s += @"$msg1 = [Windows.UI.Notifications.ToastTemplateType, Windows.UI.Notifications, ContentType = WindowsRuntime]::ToastText01; ";
+            s += @"$tc = [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime]::GetTemplateContent($msg1); ";
+            s += "$tc.SelectSingleNode('//text[@id=\"1\"]').InnerText = $msg; ";
+            s += @"$AppId = '{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe'; ";
+            //s += @"$AppId = 'Microsoft.Windows.Explorer'; ";
+            s += @"[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($AppId).Show($tc)";
+            Process cmd = new Process();
+            cmd.StartInfo.FileName = "PowerShell.exe";
+            cmd.StartInfo.WindowStyle = ProcessWindowStyle.Hidden; 
+            cmd.StartInfo.Arguments = s;
+            cmd.Start();
         }
     }
 }

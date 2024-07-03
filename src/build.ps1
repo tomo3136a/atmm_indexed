@@ -24,6 +24,8 @@ Add-Type -OutputType WindowsApplication `
 
 Copy-Item -Force ./install.cmd $OutputPath
 Copy-Item -Force ./install-u.cmd $OutputPath
+Copy-Item -Force ./RegisterWatchFiles.cmd $OutputPath
+Copy-Item -Force ./RegisterWatchFiles.ps1 $OutputPath
 
 Write-Host "build completed." -ForegroundColor Yellow
 $host.UI.RawUI.ReadKey() | Out-Null
