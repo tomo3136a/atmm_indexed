@@ -4,9 +4,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Threading;
-//using Windows.UI.Notifications.Management;
-//using Windows.Foundation.Metadata;
-//using Windows.UI.Notifications;
+
 namespace Tmm
 {
     public partial class ItemManager
@@ -28,7 +26,7 @@ namespace Tmm
                     var name = src.FullName;
                     if (SetSource(src.Name, 0, 0))
                     {
-                        name = _name;
+                        // name = _name;
                     }
                     proc(this, name);
                     break;
@@ -43,61 +41,109 @@ namespace Tmm
             return src;
         }
 
+        public DirectoryInfo Monitor(DirectoryInfo src, int level, CallBack proc)
+        {
+            var name = src.FullName;
+            if (SetSource(src.Name, 0, 0))
+            {
+                // name = _name;
+            }
+            proc(this, name);
+            return src;
+        }
+
+        string GetMonitorConfigPath(bool flag = false)
+        {
+            string path = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            path = System.IO.Path.Combine(path, monitor_conf);
+            if (!flag) return path;
+            if (File.Exists(path)) return path;
+            using (var fo = new StreamWriter(path))
+            {
+                fo.WriteLineAsync("");
+            }
+            return path;
+        }
+
+        string GetMonitorDataPath(bool flag = false)
+        {
+            string path = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            path = System.IO.Path.Combine(path, monitor_name);
+            if (!flag) return path;
+            if (File.Exists(path)) return path;
+            using (var fo = new StreamWriter(path))
+            {
+                fo.WriteLineAsync("");
+            }
+            return path;
+        }
+
         public string AddMonitor(string name)
         {
-            string path = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            path = System.IO.Path.Combine(path, monitor_conf);
-            FileInfo src = new FileInfo(FileName);
-            var ptn = "*" + _name + "*" + _ext;
-            var lines = File.ReadAllLines(path);
-            foreach (var line in lines)
+            if (File.Exists(name))
             {
-                var ss = line.Split('\t');
-                if (ss.Length < 3) continue;
-                if (string.Compare(ptn, ss[2]) == 0) return src.FullName;
+                FileInfo src = new FileInfo(name);
+                var ptn = "*" + _name + "*" + _ext;
+                var path = GetMonitorConfigPath();
+                if (File.Exists(path))
+                {
+                    foreach (var line in File.ReadAllLines(path))
+                    {
+                        var ss = line.Split('\t');
+                        if (ss.Length < 3) continue;
+                        if (string.Compare(src.DirectoryName, ss[1]) != 0) continue;
+                        if (string.Compare(ptn, ss[2]) == 0) return src.FullName;
+                    }
+                }
+                using (var fo = new StreamWriter(path, true))
+                {
+                    var line = src.DirectoryName + "\t" + ptn;
+                    fo.WriteLineAsync(_name + "\t" + line);
+                }
+                return src.FullName;
             }
-            using (var fo = new StreamWriter(path, true))
+            if (Directory.Exists(name))
             {
-                // var line = src.DirectoryName + "\t" + ptn + "\t" + src.LastWriteTime;
-                var line = src.DirectoryName + "\t" + ptn;
-                fo.WriteLineAsync(name + "\t" + line);
+                var ptn = "*.*";
+                var path = GetMonitorConfigPath();
+                if (File.Exists(path))
+                {
+                    foreach (var line in File.ReadAllLines(path))
+                    {
+                        var ss = line.Split('\t');
+                        if (ss.Length < 3) continue;
+                        if (string.Compare(name, ss[1]) != 0) continue;
+                        if (string.Compare(ptn, ss[2]) == 0) return name;
+                    }
+                }
+                using (var fo = new StreamWriter(path, true))
+                {
+                    var line = name + "\t" + ptn;
+                    fo.WriteLineAsync(FileName + "\t" + line);
+                }
+                return name;
             }
-            return src.FullName;
+            return name;
         }
-
-        public bool HasMonitor(string ptn)
-        {
-            FileInfo src = new FileInfo(FileName);
-            string path = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            path = System.IO.Path.Combine(path, monitor_conf);
-            var lines = File.ReadAllLines(path);
-            foreach (var line in lines)
-            {
-                var ss = line.Split('\t');
-                if (ss.Length < 3) continue;
-                if (string.Compare(ptn, ss[2]) == 0) return true;
-            }
-            return false;
-        }
-
 
         public void LoadMonitor()
         {
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            path = System.IO.Path.Combine(path, monitor_name);
             Dictionary<string,string> dic = new Dictionary<string, string>();
-            foreach (var line in File.ReadAllLines(path))
+            string path = GetMonitorDataPath();
+            if (File.Exists(path))
             {
-                var ss = line.Split('\t');
-                if (ss.Length < 2) continue;
-                dic.Add(ss[0], ss[1]);
+                foreach (var line in File.ReadAllLines(path))
+                {
+                    var ss = line.Split('\t');
+                    if (ss.Length < 2) continue;
+                    dic.Add(ss[0], ss[1]);
+                }
             }
 
-            path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            path = System.IO.Path.Combine(path, monitor_conf);
             string msg = "";
-            var lines = File.ReadAllLines(path);
-            foreach (var line in lines)
+            path = GetMonitorConfigPath();
+            if (!File.Exists(path)) return;
+            foreach (var line in File.ReadAllLines(path))
             {
                 var ss = line.Split('\t');
                 if (ss.Length < 3) continue;
@@ -114,7 +160,7 @@ namespace Tmm
                 {
                     if (IsIgnoreName(fi.Name) == false)
                     {
-                        string dt = fi.LastWriteTime.ToString();
+                        string dt = fi.LastWriteTime.ToString("yyyy/MM/dd HH:mm:ss");
                         last = (string.Compare(last, dt) < 0) ? dt : last;
                         file = fi.Name;
                     }
@@ -128,8 +174,7 @@ namespace Tmm
 
             if (msg.Length > 0)
             {
-                path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                path = System.IO.Path.Combine(path, monitor_name);
+                path = GetMonitorDataPath(true);
                 bool append = false;
                 foreach (var k in dic.Keys)
                 {
@@ -139,91 +184,7 @@ namespace Tmm
                         append = true;
                     }
                 }
-                MessageBox.Show("検出：\n" + msg);
             }
         }
-
-        public DirectoryInfo Monitor(DirectoryInfo src, int level, CallBack proc)
-        {
-            string p = System.Environment.GetFolderPath(
-                Environment.SpecialFolder.Desktop);
-            p = System.IO.Path.Combine(p, "monitor.txt");
-
-            foreach (var fi in src.EnumerateFiles())
-            {
-                using (var fo = new StreamWriter(p, true))
-                {
-                    fo.WriteLineAsync("*" + fi.Name);
-                }
-            }
-            return src;
-
-            //var dst = new FileInfo(src.FullName);
-            //return dst;
-
-            // myCallBack = new CallBack(proc);
-            // if (level == 1)
-            // {
-            //     _tag = "【編集中】";
-            //     _index = "";
-            //     _n_rev = 0;
-            //     _note = "";
-            // }
-            // if (level == 2)
-            // {
-            //     _tag = "【参考】";
-            // }
-            // string n = BuildName();
-
-            // string p = System.Environment.GetFolderPath(
-            //     Environment.SpecialFolder.Desktop);
-            // p = System.IO.Path.Combine(p, src.Directory.Name);
-            // DirectoryInfo di = new DirectoryInfo(p);
-            // if (!di.Exists)
-            // {
-            //     di.Create();
-            // }
-            //string s = System.IO.Path.Combine(p, n);
-            //FileInfo dst = new FileInfo(s);
-            // while (dst.Exists && (myCallBack != null)) {
-            //     s = myCallBack(this, n);
-            //     if (s == null)
-            //     {
-            //         return null;
-            //     }
-            //     s = System.IO.Path.Combine(p, s);
-            //     dst = new FileInfo(s);
-            // }
-            // src.CopyTo(s);
-            //dst.Attributes &= (~FileAttributes.ReadOnly);
-            //return dst;
-        }
-
-        /////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// checkin
-        /// </summary>
-        /// <param name="src"></param>
-        /// <returns></returns>
-        public FileInfo DeleteMonitor(FileInfo src, CallBack proc)
-        {
-            myCallBack = new CallBack(proc);
-            string p = src.Directory.Parent.FullName;
-            string s = System.IO.Path.Combine(p, src.Name);
-            FileInfo dst = new FileInfo(s);
-            while (dst.Exists && (myCallBack != null)) {
-                s = myCallBack(this, src.Name);
-                if (s == null)
-                {
-                    return null;
-                }
-                s = System.IO.Path.Combine(p, s);
-                dst = new FileInfo(s);
-            }
-            src.CopyTo(s);
-            //dst.Attributes &= (~FileAttributes.ReadOnly);
-            return dst;
-        }
-   }
+    }
 }

@@ -6,7 +6,7 @@ $OutputPath = "../bin"
 $Path = "*indexed.cs", "im*.cs", "config.cs", "ui.cs", "setup.cs"
 $ReferencedAssemblies = "System.Drawing", "System.Windows.Forms"
 
-Write-Host "install start." -ForegroundColor Yellow
+Write-Host "build start." -ForegroundColor Yellow
 
 if (-not (Test-Path $OutputPath)) {
   New-Item -Path $OutputPath -ItemType Directory | Out-Null

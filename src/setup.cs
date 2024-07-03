@@ -162,6 +162,14 @@ namespace Tmm
             regkey = cu.CreateSubKey(@"Software\Classes\*\shell\at_9_monitor\command");
             regkey.SetValue("", "\"" + path + "\" -m \"%V\"");
             regkey.Close();
+            regkey = cu.CreateSubKey(@"Software\Classes\Directory\shell\at_9_monitor");
+            regkey.SetValue("MUIVerb", "モニタ登録");
+            regkey.SetValue("Extended", "");
+            regkey.Close();
+            regkey = cu.CreateSubKey(@"Software\Classes\Directory\shell\at_9_monitor\command");
+            regkey.SetValue("", "\"" + path + "\" -m \"%V\"");
+            regkey.Close();
+
 
             regkey = cu.CreateSubKey(@"Software\Classes\hashfile\shell\test");
             regkey.SetValue("MUIVerb", "ハッシュ値テスト(&H)");

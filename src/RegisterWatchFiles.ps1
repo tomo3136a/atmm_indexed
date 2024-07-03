@@ -17,7 +17,7 @@ $Trigger += New-ScheduledTaskTrigger `
 
 $Action = New-ScheduledTaskAction `
     -Execute $ExecutePath `
-    -Argument "-m1 %USERPROFILE%\desktop\monitor.txt" `
+    -Argument "-m1 %USERPROFILE%\documents\monitor.ini" `
     -WorkingDirectory $WorkingDirectory
 
 Register-ScheduledTask `
