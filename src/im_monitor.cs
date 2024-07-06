@@ -10,7 +10,13 @@ namespace Tmm
 {
     public partial class ItemManager
     {
-        public const string monitor_conf = @"monitor.ini";
+        enum FileType {
+            CONFIG,
+            DATA,
+            MESSAGE,
+            DOCUMENT
+        };
+        public const string monitor_path = @"monitor";
         public const string monitor_name = @"monitor.txt";
 
         /////////////////////////////////////////////////////////////////////
@@ -33,7 +39,7 @@ namespace Tmm
                     break;
                 }
                 case 1: {
-                    LoadMonitor();
+                    InvokeMonitor();
                     break;
                 }
                 default:
@@ -53,156 +59,247 @@ namespace Tmm
             return src;
         }
 
-        string GetMonitorConfigPath(bool flag = false)
+        /////////////////////////////////////////////////////////////////////
+
+        /// モニタ用パス取得、flag=trueの場合、ファイルが存在しなければからファイル作成
+        static string GetMonitorPath(FileType ft, bool flag = false, string opt = "")
         {
             string path = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            path = System.IO.Path.Combine(path, monitor_conf);
-            if (!flag) return path;
-            if (File.Exists(path)) return path;
-            using (var fo = new StreamWriter(path))
+            path = System.IO.Path.Combine(path, monitor_path);
+            if (! Directory.Exists(path))
             {
-                fo.WriteLineAsync("");
+                Directory.CreateDirectory(path);
             }
-            return path;
-        }
-
-        string GetMonitorDataPath(bool flag = false)
-        {
-            string path = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            path = System.IO.Path.Combine(path, monitor_name);
-            if (!flag) return path;
-            if (File.Exists(path)) return path;
-            using (var fo = new StreamWriter(path))
+            string name = monitor_name;
+            string ext = Path.GetExtension(name);
+            switch (ft)
             {
-                fo.WriteLineAsync("");
+                case FileType.CONFIG: ext = "ini"; break;
+                case FileType.DATA: ext = "txt"; break;
+                case FileType.MESSAGE: ext = "msg"; break;
+                case FileType.DOCUMENT: ext = "xml"; break;
             }
-            return path;
-        }
-
-        public string AddMonitor(string name)
-        {
-            if (File.Exists(name))
+            name = Path.ChangeExtension(name, ext);
+            name = name.Replace(".", opt + ".");
+            path = System.IO.Path.Combine(path, name);
+            if (flag)
             {
-                FileInfo src = new FileInfo(name);
-                var ptn = "*" + _name + "*" + _ext;
-                var path = GetMonitorConfigPath();
-                if (File.Exists(path))
+                if (! File.Exists(path))
                 {
-                    foreach (var line in File.ReadAllLines(path))
+                    using (var fo = new StreamWriter(path))
+                    {
+                        fo.WriteLineAsync("");
+                    }
+                }
+            }
+            return path;
+        }
+
+        /// モニタ対象の追加
+        public string AddMonitor(string path)
+        {
+            //モニタ対象がファイルの場合
+            if (File.Exists(path))
+            {
+                FileInfo src = new FileInfo(path);
+                var dir = src.DirectoryName;
+                var ptn = "*" + _name + "*" + _ext;
+                var conf = GetMonitorPath(FileType.CONFIG);
+                //設定ファイルがある場合、設定ファイルに登録済みなら何せず終了
+                if (File.Exists(conf))
+                {
+                    foreach (var line in File.ReadAllLines(conf))
                     {
                         var ss = line.Split('\t');
                         if (ss.Length < 3) continue;
-                        if (string.Compare(src.DirectoryName, ss[1]) != 0) continue;
+                        if (string.Compare(dir, ss[1]) != 0) continue;
                         if (string.Compare(ptn, ss[2]) == 0) return src.FullName;
                     }
                 }
-                using (var fo = new StreamWriter(path, true))
+                //設定ファイルにモニタ対象を追加
+                using (var fo = new StreamWriter(conf, true))
                 {
-                    var line = src.DirectoryName + "\t" + ptn;
+                    var line = dir + "\t" + ptn;
                     fo.WriteLineAsync(_name + "\t" + line);
                 }
                 return src.FullName;
             }
-            if (Directory.Exists(name))
+
+            //モニタ対象がディレクトリの場合
+            if (Directory.Exists(path))
             {
+                DirectoryInfo src = new DirectoryInfo(path);
+                var dir = src.FullName;
                 var ptn = "*.*";
-                var path = GetMonitorConfigPath();
-                if (File.Exists(path))
+                var conf = GetMonitorPath(FileType.CONFIG);
+                //設定ファイルがある場合、設定ファイルに登録済みなら何せず終了
+                if (File.Exists(conf))
                 {
-                    foreach (var line in File.ReadAllLines(path))
+                    foreach (var line in File.ReadAllLines(conf))
                     {
                         var ss = line.Split('\t');
                         if (ss.Length < 3) continue;
-                        if (string.Compare(name, ss[1]) != 0) continue;
-                        if (string.Compare(ptn, ss[2]) == 0) return name;
+                        if (string.Compare(dir, ss[1]) != 0) continue;
+                        if (string.Compare(ptn, ss[2]) == 0) return src.FullName;
                     }
                 }
-                using (var fo = new StreamWriter(path, true))
+                //設定ファイルにモニタ対象を追加
+                using (var fo = new StreamWriter(conf, true))
                 {
-                    var line = name + "\t" + ptn;
+                    var line = dir + "\t" + ptn;
                     fo.WriteLineAsync(FileName + "\t" + line);
                 }
-                return name;
+                return src.FullName;
             }
-            return name;
+            return path;
         }
 
-        public void LoadMonitor()
+        ///ファイル変更モニタ実施
+        public void InvokeMonitor()
         {
-            Dictionary<string,string> dic = new Dictionary<string, string>();
-            string path = GetMonitorDataPath();
-            if (File.Exists(path))
-            {
-                foreach (var line in File.ReadAllLines(path))
-                {
-                    var ss = line.Split('\t');
-                    if (ss.Length < 2) continue;
-                    dic.Add(ss[0], ss[1]);
-                }
-            }
+            //設定ファイルが無ければ終了
+            string conf = GetMonitorPath(FileType.CONFIG);
+            if (! File.Exists(conf)) return;
 
-            string msg = "";
-            List<string> msgs = new List<string>();
-            path = GetMonitorConfigPath();
-            if (!File.Exists(path)) return;
-            foreach (var line in File.ReadAllLines(path))
+            //前回のモニタ結果がある場合は読み込み、timに設定
+            Dictionary<string,string> tim = LoadData();
+            bool update = false;
+
+            Dictionary<string,string> dic = new Dictionary<string, string>();
+            int cnt = 0;
+
+            //設定ごとに調査
+            foreach (var line in File.ReadAllLines(conf))
             {
                 var ss = line.Split('\t');
                 if (ss.Length < 3) continue;
                 var name = ss[0];
                 var dir = ss[1];
                 var ptn = ss[2];
+
+                List<string> filelist = new List<string>();
+                string file = "";
+                string date = "";
+                if (tim.ContainsKey(name)) date = tim[name];
+                string last = date;
+
+                //ディレクトリ内を調査し更新さえれたファイルリストを取得する
                 DirectoryInfo di = new DirectoryInfo(dir);
                 FileInfo[] fis = di.GetFiles(ptn, System.IO.SearchOption.AllDirectories);
-                string date = "";
-                if (dic.ContainsKey(name)) date = dic[name];
-                string last = date;
-                string file = "";
                 foreach (FileInfo fi in fis)
                 {
-                    if (IsIgnoreName(fi.Name) == false)
-                    {
-                        string dt = fi.LastWriteTime.ToString("yyyy/MM/dd HH:mm:ss");
-                        if (string.Compare(last, dt) < 0) {
-                            last = dt;
-                            file = fi.Name;
-                        }
-                    }
+                    if (IsIgnoreName(fi.Name)) continue;
+                    string dt = fi.LastWriteTime.ToString("yyyy/MM/dd HH:mm:ss");
+                    if (string.Compare(date, dt) >= 0) continue;
+                    if (! dic.ContainsKey(fi.FullName)) filelist.Add(fi.FullName);
+                    dic[fi.FullName] = name;
+                    if (string.Compare(last, dt) >= 0) continue;
+                    last = dt;
+                    file = fi.Name;
                 }
-                if (file.Length > 0)
-                {
-                    //msg += "name=" + name + "\ndir=" + dir + "\nptn=" + ptn + "\ndate="+ date + " -> " + last + "\n" + file + "\n\n";
-                    msg += file + " ";
-                    msgs.Add(file);
-                    dic[name] = last;
+                //更新ファイルがあればトースト通知
+                if (filelist.Count > 0) {
+                    tim[name] = last;
+                    update = true;
+                    string s = "";
+                    foreach(var s1 in filelist)
+                    {
+                        s += " " + s1.Substring(1 + dir.Length);
+                    }
+                    string v = "";
+                    if (cnt++ > 0) v = cnt.ToString();
+                    string path = GetMonitorPath(FileType.DOCUMENT,false,v);
+                    CreateMessage(path, name, s, file, dir);
+                    ToastOut(path);
                 }
             }
 
-            if (msg.Length > 0)
+            //データが変更されたらデータファイルに保存
+            if (update)
             {
-                path = GetMonitorDataPath(true);
-                bool append = false;
-                foreach (var k in dic.Keys)
-                {
-                    using (var fo = new StreamWriter(path, append))
-                    {
-                        fo.WriteLineAsync(k + "\t" + dic[k]);
-                        append = true;
-                    }
-                }
-                ToastOut(msg);
+                SaveData(tim);
             }
         }
 
-        static void ToastOut(string msg)
+        /////////////////////////////////////////////////////////////////////
+
+        //データファイル読み込み
+        static Dictionary<string,string> LoadData()
         {
-            string s = @"$msg = '" + msg + @"'; ";
-            s += @"$msg1 = [Windows.UI.Notifications.ToastTemplateType, Windows.UI.Notifications, ContentType = WindowsRuntime]::ToastText01; ";
-            s += @"$tc = [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime]::GetTemplateContent($msg1); ";
-            s += "$tc.SelectSingleNode('//text[@id=\"1\"]').InnerText = $msg; ";
-            s += @"$AppId = '{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe'; ";
-            //s += @"$AppId = 'Microsoft.Windows.Explorer'; ";
-            s += @"[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($AppId).Show($tc)";
+            var tim = new Dictionary<string, string>();
+            string data = GetMonitorPath(FileType.DATA);
+            if (File.Exists(data))
+            {
+                foreach (var line in File.ReadAllLines(data))
+                {
+                    var ss = line.Split('\t');
+                    if (ss.Length < 2) continue;
+                    tim.Add(ss[0], ss[1]);
+                }
+            }
+            return tim;
+        }
+
+        //データファイル書き出し
+        static void SaveData(Dictionary<string,string> tim)
+        {
+            string path = GetMonitorPath(FileType.DATA, true);
+            bool append = false;
+            foreach (var k in tim.Keys)
+            {
+                using (var fo = new StreamWriter(path, append))
+                {
+                    fo.WriteLineAsync(k + "\t" + tim[k]);
+                    append = true;
+                }
+            }
+        }
+
+        /////////////////////////////////////////////////////////////////////
+
+    // <input id=""idSnoozeTime"" type=""selection"" defaultInput=""5"">
+    //   <selection id=""1"" content=""1 minute"" />
+    //   <selection id=""5"" content=""5 minutes"" />
+    //   <selection id=""15"" content=""15 minutes"" />
+    //   <selection id=""60"" content=""1 hour"" />
+    //   <selection id=""120"" content=""2 hours"" />
+    // </input>
+    // <action activationType=""system"" arguments=""snooze"" hint-inputId=""idSnoozeTime"" content="""" />
+    // <action activationType=""system"" arguments=""dismiss"" content="""" />
+
+        static void CreateMessage(string path, string msg1, string msg2, string action, string folder)
+        {
+            action = @"file:///" + Path.Combine(folder, action).Replace("\\","/");
+            folder = @"file:///" + folder.Replace("\\","/");
+            string template = @"
+<toast activationType='protocol' launch='" + action + @"' >
+  <visual>
+    <binding template='ToastGeneric'>
+      <text>ファイル変更通知</text>
+      <text>" + msg1 + @"</text>
+      <text>" + msg2 + @"</text>
+    </binding>
+  </visual>
+  <actions>
+    <action content='開く' activationType='protocol' arguments='" + action + @"' />
+    <action content='フォルダ' activationType='protocol' arguments='" + folder + @"' />
+  </actions>
+</toast>
+";
+            using (var fo = new StreamWriter(path))
+            {
+                fo.WriteLine(template);
+            }
+        } 
+
+        static void ToastOut(string path)
+        {
+            string s = @"$doc = Get-Content """ + path + @""" -Encoding UTF8;";
+            s += @"[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null;";
+            s += @"[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom, ContentType = WindowsRuntime] > $null;";
+            s += @"$xml = New-Object Windows.Data.Xml.Dom.XmlDocument; $xml.LoadXml($doc);";
+            s += @"$toast = [Windows.UI.Notifications.ToastNotification]::new($xml);";
+            s += @"[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Microsoft.Windows.Explorer').Show($toast);";
             Process cmd = new Process();
             cmd.StartInfo.FileName = "PowerShell.exe";
             cmd.StartInfo.WindowStyle = ProcessWindowStyle.Hidden; 
