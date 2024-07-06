@@ -7,7 +7,7 @@ catch {}
 
 # configure
 $ExecutePath = "c:\opt\bin\indexed.exe"
-$WorkingDirectory = "%USERPROFILE%\desktop"
+$WorkingDirectory = "%USERPROFILE%\documents\monitor"
 
 # registration task schedule
 $Trigger = @()
@@ -17,7 +17,7 @@ $Trigger += New-ScheduledTaskTrigger `
 
 $Action = New-ScheduledTaskAction `
     -Execute $ExecutePath `
-    -Argument "-m1 %USERPROFILE%\documents\monitor.ini" `
+    -Argument "-m1" `
     -WorkingDirectory $WorkingDirectory
 
 Register-ScheduledTask `

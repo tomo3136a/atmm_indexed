@@ -426,5 +426,39 @@ namespace Tmm
             dlg.FormatTypeIndex = 0;
             return dlg;
         }
+
+        /////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// add Monitor dialog
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="dt"></param>
+        /// <returns></returns>
+        public static string AddMonitorDialog(string name, string src, string ptn)
+        {
+            string title = "ファイル監視";
+            string text = "項目名を入れてください。";
+            InputDialog dlg = new InputDialog(text, title, false);
+            dlg.SrcName = "フォルダ: " + src;
+            dlg.DstName = "パターン： " + ptn;
+
+            string res = null;
+            try
+            {
+                //dlg.UpdateList(@"monitor", src);
+                dlg.Value = name;
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    return dlg.Value;
+                }
+            }
+            catch
+            {
+                MessageBox.Show("operation error.", 
+                    AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            return res;
+        }
     }
 }

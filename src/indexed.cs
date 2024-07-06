@@ -366,6 +366,12 @@ namespace Tmm
                     ItemManager im = new ItemManager(1, index, 0);
                     im.CreateHashFile(dst);
                 }
+                //action monitor
+                if (HasMode(Mode.MonitorMode))
+                {
+                    ItemManager im = new ItemManager();
+                    im.Monitor(dst, _level, MonitorProc);
+                }
             }
 
             /////////////////////////////////////////////////////////////////////

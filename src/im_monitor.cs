@@ -50,12 +50,23 @@ namespace Tmm
 
         public DirectoryInfo Monitor(DirectoryInfo src, int level, CallBack proc)
         {
-            var name = src.FullName;
-            if (SetSource(src.Name, 0, 0))
-            {
-                // name = _name;
+            switch (level) {
+                case 0: {
+                var name = src.FullName;
+                if (SetSource(src.Name, 0, 0))
+                {
+                    // name = _name;
+                }
+                proc(this, name);
+                    break;
+                }
+                case 1: {
+                    InvokeMonitor();
+                    break;
+                }
+                default:
+                    break;
             }
-            proc(this, name);
             return src;
         }
 
@@ -104,6 +115,8 @@ namespace Tmm
                 FileInfo src = new FileInfo(path);
                 var dir = src.DirectoryName;
                 var ptn = "*" + _name + "*" + _ext;
+                _name = Program.AddMonitorDialog(_name, dir, ptn);
+
                 var conf = GetMonitorPath(FileType.CONFIG);
                 //設定ファイルがある場合、設定ファイルに登録済みなら何せず終了
                 if (File.Exists(conf))
