@@ -1,4 +1,4 @@
-#installer for indexed.exe
+﻿#installer for indexed.exe
 #
 $AppName = "indexed.exe"
 $OutputPath = "../bin"

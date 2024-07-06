@@ -1,13 +1,20 @@
-# remove duplication task-name
-try {
-    #Get-ScheduledTask -TaskName $TaskName | Unregister-ScheduledTask
-    Unregister-ScheduledTask -TaskName "WatchFiles"
+﻿param($Name = "ファイル監視")
+
+# remove resistered task
+if (Get-ScheduledTask | Where-Object {$_.TaskName -eq $Name}) {
+    try {
+        Write-Host "Stop ScheduleTask ${Name}." -ForegroundColor Yellow
+        Stop-ScheduledTask  -TaskName $Name
+
+        Write-Host "Unregister ScheduleTask ${Name}." -ForegroundColor Yellow
+        Unregister-ScheduledTask -TaskName $Name -Confirm:$false
+    }
+    catch {}
 }
-catch {}
 
 # configure
 $ExecutePath = "c:\opt\bin\indexed.exe"
-$WorkingDirectory = "%USERPROFILE%\documents\monitor"
+$WorkingDirectory = "%USERPROFILE%\documents"
 
 # registration task schedule
 $Trigger = @()
@@ -20,11 +27,16 @@ $Action = New-ScheduledTaskAction `
     -Argument "-m1" `
     -WorkingDirectory $WorkingDirectory
 
+Write-Host "Register ScheduleTask ${Name}." -ForegroundColor Yellow
 Register-ScheduledTask `
-    -TaskName "WatchFiles" `
+    -TaskName $Name `
     -Action $Action `
-    -Trigger $Trigger
+    -Trigger $Trigger | Out-Null
 
 # display next scedule information
-Get-ScheduledTaskInfo -TaskName "WatchFiles"
-#$host.UI.RawUI.ReadKey() | Out-Null
+Write-Host "Display ScheduleTask ${Name}." -ForegroundColor Yellow
+Get-ScheduledTaskInfo -TaskName $Name
+
+# end of resister task
+Write-Host "Registered ScheduleTask completed." -ForegroundColor Yellow
+$host.UI.RawUI.ReadKey() | Out-Null
