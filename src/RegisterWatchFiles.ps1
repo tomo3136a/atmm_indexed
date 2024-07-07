@@ -1,15 +1,19 @@
-﻿param($Name = "ファイル監視")
+﻿param($Name = "ファイル監視", [switch]$Clean = $false)
 
 # remove resistered task
-if (Get-ScheduledTask | Where-Object {$_.TaskName -eq $Name}) {
-    try {
-        Write-Host "Stop ScheduleTask ${Name}." -ForegroundColor Yellow
-        Stop-ScheduledTask  -TaskName $Name
+if ($Clean) {
+    if (Get-ScheduledTask | Where-Object {$_.TaskName -eq $Name}) {
+        try {
+            Write-Host "Stop ScheduleTask ${Name}." -ForegroundColor Yellow
+            Stop-ScheduledTask  -TaskName $Name
 
-        Write-Host "Unregister ScheduleTask ${Name}." -ForegroundColor Yellow
-        Unregister-ScheduledTask -TaskName $Name -Confirm:$false
+            Write-Host "Unregister ScheduleTask ${Name}." -ForegroundColor Yellow
+            Unregister-ScheduledTask -TaskName $Name -Confirm:$false
+        }
+        catch {}
     }
-    catch {}
+    $host.UI.RawUI.ReadKey() | Out-Null
+    Exit
 }
 
 # configure
@@ -31,7 +35,7 @@ $Settings = New-ScheduledTaskSettingsSet `
     -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
 
 Write-Host "Register ScheduleTask ${Name}." -ForegroundColor Yellow
-Register-ScheduledTask `
+Register-ScheduledTask -Force `
     -TaskName $Name `
     -Action $Action `
     -Settings $Settings `

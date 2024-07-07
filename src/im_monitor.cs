@@ -1,3 +1,5 @@
+///ファイル監視
+
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -5,6 +7,9 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Threading;
 using System.Diagnostics;
+using System.Linq;
+using System.Xml.Linq;
+using System.Xml;
 
 namespace Tmm
 {
@@ -115,10 +120,10 @@ namespace Tmm
                 FileInfo src = new FileInfo(path);
                 var dir = src.DirectoryName;
                 var ptn = "*" + _name + "*" + _ext;
-                _name = Program.AddMonitorDialog(_name, dir, ptn);
+                var name = Program.AddMonitorDialog(_name, dir, ptn);
 
                 var conf = GetMonitorPath(FileType.CONFIG);
-                //設定ファイルがある場合、設定ファイルに登録済みなら何せず終了
+                //設定ファイルがある場合、設定ファイルに登録済みなら終了
                 if (File.Exists(conf))
                 {
                     foreach (var line in File.ReadAllLines(conf))
@@ -133,7 +138,7 @@ namespace Tmm
                 using (var fo = new StreamWriter(conf, true))
                 {
                     var line = dir + "\t" + ptn;
-                    fo.WriteLineAsync(_name + "\t" + line);
+                    fo.WriteLineAsync(name + "\t" + line);
                 }
                 return src.FullName;
             }
@@ -145,7 +150,9 @@ namespace Tmm
                 var dir = src.FullName;
                 var ptn = "*.*";
                 var conf = GetMonitorPath(FileType.CONFIG);
-                //設定ファイルがある場合、設定ファイルに登録済みなら何せず終了
+                var name = Program.AddMonitorDialog(FileName, dir, ptn);
+
+                //設定ファイルがある場合、設定ファイルに登録済みならなにもせず終了
                 if (File.Exists(conf))
                 {
                     foreach (var line in File.ReadAllLines(conf))
@@ -160,7 +167,7 @@ namespace Tmm
                 using (var fo = new StreamWriter(conf, true))
                 {
                     var line = dir + "\t" + ptn;
-                    fo.WriteLineAsync(FileName + "\t" + line);
+                    fo.WriteLineAsync(name + "\t" + line);
                 }
                 return src.FullName;
             }
@@ -174,11 +181,12 @@ namespace Tmm
             string conf = GetMonitorPath(FileType.CONFIG);
             if (! File.Exists(conf)) return;
 
-            //前回のモニタ結果がある場合は読み込み、timに設定
+            //前回のモニタ結果がある場合、timに読み込み
             Dictionary<string,string> tim = LoadData();
             bool update = false;
 
             Dictionary<string,string> dic = new Dictionary<string, string>();
+            int idx = 0;
             int cnt = 0;
 
             //設定ごとに調査
@@ -189,6 +197,7 @@ namespace Tmm
                 var name = ss[0];
                 var dir = ss[1];
                 var ptn = ss[2];
+                idx ++;
 
                 List<string> filelist = new List<string>();
                 string file = "";
@@ -196,7 +205,7 @@ namespace Tmm
                 if (tim.ContainsKey(name)) date = tim[name];
                 string last = date;
 
-                //ディレクトリ内を調査し更新さえれたファイルリストを取得する
+                //ディレクトリを調査し更新さえれたファイルリストを取得
                 DirectoryInfo di = new DirectoryInfo(dir);
                 FileInfo[] fis = di.GetFiles(ptn, System.IO.SearchOption.AllDirectories);
                 foreach (FileInfo fi in fis)
@@ -210,7 +219,7 @@ namespace Tmm
                     last = dt;
                     file = fi.Name;
                 }
-                //更新ファイルがあればトースト通知
+                //更新ファイルがる場合、トースト通知
                 if (filelist.Count > 0) {
                     tim[name] = last;
                     update = true;
@@ -222,7 +231,7 @@ namespace Tmm
                     string v = "";
                     if (cnt++ > 0) v = cnt.ToString();
                     string path = GetMonitorPath(FileType.DOCUMENT,false,v);
-                    CreateMessage(path, name, s, file, dir);
+                    CreateMessage(idx, path, name, s, file, dir);
                     ToastOut(path);
                 }
             }
@@ -270,41 +279,62 @@ namespace Tmm
 
         /////////////////////////////////////////////////////////////////////
 
-    // <input id=""idSnoozeTime"" type=""selection"" defaultInput=""5"">
-    //   <selection id=""1"" content=""1 minute"" />
-    //   <selection id=""5"" content=""5 minutes"" />
-    //   <selection id=""15"" content=""15 minutes"" />
-    //   <selection id=""60"" content=""1 hour"" />
-    //   <selection id=""120"" content=""2 hours"" />
-    // </input>
-    // <action activationType=""system"" arguments=""snooze"" hint-inputId=""idSnoozeTime"" content="""" />
-    // <action activationType=""system"" arguments=""dismiss"" content="""" />
+        //無効ファイルのチェック
+        static bool IgnoreFileName(string name)
+        {
+            switch (System.IO.Path.GetExtension(name).ToLower())
+            {
+                case ".exe": return true;
+                case ".bat": return true;
+                case ".cmd": return true;
+                case ".ps1": return true;
+            }
+            return false;
+        }
 
-        static void CreateMessage(string path, string msg1, string msg2, string action, string folder)
+        //トーストメッセージファイル作成
+        static void CreateMessage(int idx, string path, string msg1, string msg2, string action, string folder)
         {
             action = @"file:///" + Path.Combine(folder, action).Replace("\\","/");
             folder = @"file:///" + folder.Replace("\\","/");
-            string template = @"
-<toast activationType='protocol' launch='" + action + @"' >
-  <visual>
-    <binding template='ToastGeneric'>
-      <text>ファイル変更通知</text>
-      <text>" + msg1 + @"</text>
-      <text>" + msg2 + @"</text>
-    </binding>
-  </visual>
-  <actions>
-    <action content='開く' activationType='protocol' arguments='" + action + @"' />
-    <action content='フォルダ' activationType='protocol' arguments='" + folder + @"' />
-  </actions>
-</toast>
-";
-            using (var fo = new StreamWriter(path))
+            string launch = folder;
+            XElement actions = null;
+            if (! IgnoreFileName(action))
             {
-                fo.WriteLine(template);
+                launch = action;
+                actions = new XElement("actions",
+                    new XElement("action",
+                        new XAttribute("activationType", "protocol"),
+                        new XAttribute("arguments", action),
+                        new XAttribute("content", "開く")
+                    ),
+                    new XElement("action",
+                        new XAttribute("activationType", "protocol"),
+                        new XAttribute("arguments", folder),
+                        new XAttribute("content", "フォルダ")
+                    )
+                );
             }
+            XElement elm = new XElement("toast",
+                new XAttribute("activationType", "protocol"),
+                new XAttribute("launch", launch),
+                new XElement("visual",
+                    new XAttribute("branding", "name"),
+                    new XElement("binding",
+                        new XAttribute("template", "ToastGeneric"),
+                        new XElement("text",
+                            new XAttribute("placement", "attribution"),
+                            "ファイル変更通知"),
+                        new XElement("text", msg1),
+                        new XElement("text", msg2)
+                    )
+                ),
+                actions
+            );
+            (new XDocument(elm)).Save(path);
         } 
 
+        //トーストメッセージファイルを通知
         static void ToastOut(string path)
         {
             string s = @"$doc = Get-Content """ + path + @""" -Encoding UTF8;";

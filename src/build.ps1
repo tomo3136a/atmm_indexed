@@ -4,7 +4,7 @@ $AppName = "indexed.exe"
 $OutputPath = "../bin"
 
 $Path = "*indexed.cs", "im*.cs", "config.cs", "ui.cs", "setup.cs"
-$ReferencedAssemblies = "System.Drawing", "System.Windows.Forms"
+$ReferencedAssemblies = "System.Drawing", "System.Windows.Forms", "System.Xml", "System.Xml.Linq"
 
 Write-Host "build start." -ForegroundColor Yellow
 
