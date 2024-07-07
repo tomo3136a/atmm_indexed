@@ -205,19 +205,31 @@ namespace Tmm
                 if (tim.ContainsKey(name)) date = tim[name];
                 string last = date;
 
+                //ディレクトリ一覧を取得
+                List<DirectoryInfo> dis = new List<DirectoryInfo>();
+                dis.Add(new DirectoryInfo(dir));
+                for (int i = 0; i < dis.Count; i ++) {
+                    foreach (DirectoryInfo di in dis[i].EnumerateDirectories())
+                    {
+                        if (IsIgnoreName(di.Name)) continue;
+                        dis.Add(di);
+                        if (dis.Count > 100) break;
+                    }
+                    if (dis.Count > 100) break;
+                }
                 //ディレクトリを調査し更新さえれたファイルリストを取得
-                DirectoryInfo di = new DirectoryInfo(dir);
-                FileInfo[] fis = di.GetFiles(ptn, System.IO.SearchOption.AllDirectories);
-                foreach (FileInfo fi in fis)
-                {
-                    if (IsIgnoreName(fi.Name)) continue;
-                    string dt = fi.LastWriteTime.ToString("yyyy/MM/dd HH:mm:ss");
-                    if (string.Compare(date, dt) >= 0) continue;
-                    if (! dic.ContainsKey(fi.FullName)) filelist.Add(fi.FullName);
-                    dic[fi.FullName] = name;
-                    if (string.Compare(last, dt) >= 0) continue;
-                    last = dt;
-                    file = fi.Name;
+                foreach (DirectoryInfo di in dis) {
+                    foreach (FileInfo fi in di.EnumerateFiles(ptn))
+                    {
+                        if (IsIgnoreName(fi.Name)) continue;
+                        string dt = fi.LastWriteTime.ToString("yyyy/MM/dd HH:mm:ss");
+                        if (string.Compare(date, dt) >= 0) continue;
+                        if (! dic.ContainsKey(fi.FullName)) filelist.Add(fi.FullName);
+                        dic[fi.FullName] = name;
+                        if (string.Compare(last, dt) >= 0) continue;
+                        last = dt;
+                        file = fi.Name;
+                    }
                 }
                 //更新ファイルがる場合、トースト通知
                 if (filelist.Count > 0) {
