@@ -19,6 +19,7 @@ namespace Tmm
             Label textLabel = new Label();
             Button accept = new Button();
             Button cancel = new Button();
+            Button config = new Button();
             ComboBox textBox = new ComboBox();
             Label srcLabel = new Label();
             Label dstLabel = new Label();
@@ -26,7 +27,7 @@ namespace Tmm
             ComboBox comboBox = new ComboBox();
             ListBox listBox = new ListBox();
 
-            public InputDialog(string text, string caption, bool bList=false)
+            public InputDialog(string text, string caption, bool bList=false, string sConfig=null)
             {
                 int width = 400;
                 int height = 190;
@@ -81,6 +82,14 @@ namespace Tmm
                 cancel.DialogResult = DialogResult.Cancel;
                 cancel.Click += new EventHandler(on_close);
 
+                config.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+                config.Text = "Abort";
+                config.Width = 100;
+                config.Left = 10;
+                config.Top = h - 10 - cancel.Height;
+                config.DialogResult = DialogResult.Abort;
+                config.Click += new EventHandler(on_close);
+
                 textBox.Anchor = AnchorStyles.Top | AnchorStyles.Left
                     | AnchorStyles.Right;
                 textBox.Width = w - 10 * 2;
@@ -129,6 +138,11 @@ namespace Tmm
                 {
                     this.Controls.Add(listBox);
                 }
+                if (null != sConfig)
+                {
+                    if (sConfig.Length > 0) config.Text = sConfig;
+                    this.Controls.Add(config);
+                }
                 this.Controls.Add(accept);
                 this.Controls.Add(cancel);
                 this.Controls.Add(textLabel);
@@ -142,14 +156,6 @@ namespace Tmm
             {
                 this.Close();
             }
-
-            // void on_change(Object sender, EventArgs e)
-            // {
-            //     var cb = (ComboBox)sender;
-            //     cb.SelectionLength = 0;
-            //     cb.SelectionStart = cb.Text.Length;
-            //     cb.SelectionLength = 0;
-            // }
 
             void on_changed(Object sender, EventArgs e)
             {
@@ -435,11 +441,11 @@ namespace Tmm
         /// <param name="name"></param>
         /// <param name="dt"></param>
         /// <returns></returns>
-        public static string AddMonitorDialog(string name, string src, string ptn)
+        public static string AddMonitorDialog(string name, string src, string ptn, string btn="")
         {
             string title = "ファイル監視";
             string text = "項目名を入れてください。";
-            InputDialog dlg = new InputDialog(text, title, false);
+            InputDialog dlg = new InputDialog(text, title, false, btn);
             dlg.SrcName = "フォルダ: " + src;
             dlg.DstName = "パターン： " + ptn;
 
@@ -448,9 +454,14 @@ namespace Tmm
             {
                 //dlg.UpdateList(@"monitor", src);
                 dlg.Value = name;
-                if (dlg.ShowDialog() == DialogResult.OK)
+                switch (dlg.ShowDialog())
                 {
-                    return dlg.Value;
+                    case DialogResult.OK:
+                        res = dlg.Value;
+                        break;
+                    case DialogResult.Abort:
+                        res = "*";
+                        break;
                 }
             }
             catch

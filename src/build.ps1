@@ -4,7 +4,8 @@ $AppName = "indexed.exe"
 $OutputPath = "../bin"
 
 $Path = "*indexed.cs", "im*.cs", "config.cs", "ui.cs", "setup.cs"
-$ReferencedAssemblies = "System.Drawing", "System.Windows.Forms", "System.Xml", "System.Xml.Linq"
+$ReferencedAssemblies = "System.Drawing", "System.Windows.Forms", `
+  "System.Xml", "System.Xml.Linq"
 
 Write-Host "build start." -ForegroundColor Yellow
 
@@ -23,9 +24,9 @@ Add-Type -OutputType WindowsApplication `
   -ReferencedAssemblies $ReferencedAssemblies
 
 Copy-Item -Force ./install.cmd $OutputPath
-Copy-Item -Force ./install-u.cmd $OutputPath
-Copy-Item -Force ./RegisterWatchFiles.cmd $OutputPath
-Copy-Item -Force ./RegisterWatchFiles.ps1 $OutputPath
+Copy-Item -Force ./uninstall.cmd $OutputPath
+Copy-Item -Force ./install_task.cmd $OutputPath
+Copy-Item -Force ./install_task.ps1 $OutputPath
 
 Write-Host "build completed." -ForegroundColor Yellow
 $host.UI.RawUI.ReadKey() | Out-Null

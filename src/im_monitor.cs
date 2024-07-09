@@ -1,4 +1,4 @@
-///ファイル監視
+﻿///ファイル監視
 
 using System;
 using System.IO;
@@ -21,7 +21,7 @@ namespace Tmm
             MESSAGE,
             DOCUMENT
         };
-        public const string monitor_path = @"monitor";
+        public const string monitor_path = @"Indexed";
         public const string monitor_name = @"monitor.txt";
 
         /////////////////////////////////////////////////////////////////////
@@ -80,7 +80,7 @@ namespace Tmm
         /// モニタ用パス取得、flag=trueの場合、ファイルが存在しなければからファイル作成
         static string GetMonitorPath(FileType ft, bool flag = false, string opt = "")
         {
-            string path = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             path = System.IO.Path.Combine(path, monitor_path);
             if (! Directory.Exists(path))
             {
@@ -120,7 +120,16 @@ namespace Tmm
                 FileInfo src = new FileInfo(path);
                 var dir = src.DirectoryName;
                 var ptn = "*" + _name + "*" + _ext;
-                var name = Program.AddMonitorDialog(_name, dir, ptn);
+                var name = Program.AddMonitorDialog(_name, dir, ptn, "設定");
+
+                if ("*" == name)
+                {
+                    var p = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                    p = System.IO.Path.Combine(p, monitor_path);
+                    p = System.IO.Path.Combine(p, Path.ChangeExtension(monitor_name, "ini"));
+                    System.Diagnostics.Process.Start(p);
+                    return null;
+                }
 
                 var conf = GetMonitorPath(FileType.CONFIG);
                 //設定ファイルがある場合、設定ファイルに登録済みなら終了
@@ -150,7 +159,16 @@ namespace Tmm
                 var dir = src.FullName;
                 var ptn = "*.*";
                 var conf = GetMonitorPath(FileType.CONFIG);
-                var name = Program.AddMonitorDialog(FileName, dir, ptn);
+                var name = Program.AddMonitorDialog(FileName, dir, ptn, "設定");
+
+                if ("*" == name)
+                {
+                    var p = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                    p = System.IO.Path.Combine(p, monitor_path);
+                    p = System.IO.Path.Combine(p, Path.ChangeExtension(monitor_name, "ini"));
+                    System.Diagnostics.Process.Start(p);
+                    return null;
+                }
 
                 //設定ファイルがある場合、設定ファイルに登録済みならなにもせず終了
                 if (File.Exists(conf))
@@ -199,12 +217,6 @@ namespace Tmm
                 var ptn = ss[2];
                 idx ++;
 
-                List<string> filelist = new List<string>();
-                string file = "";
-                string date = "";
-                if (tim.ContainsKey(name)) date = tim[name];
-                string last = date;
-
                 //ディレクトリ一覧を取得
                 List<DirectoryInfo> dis = new List<DirectoryInfo>();
                 dis.Add(new DirectoryInfo(dir));
@@ -217,7 +229,13 @@ namespace Tmm
                     }
                     if (dis.Count > 100) break;
                 }
+
                 //ディレクトリを調査し更新さえれたファイルリストを取得
+                List<string> filelist = new List<string>();
+                string file = "";
+                string date = "";
+                if (tim.ContainsKey(name)) date = tim[name];
+                string last = date;
                 foreach (DirectoryInfo di in dis) {
                     foreach (FileInfo fi in di.EnumerateFiles(ptn))
                     {
@@ -231,6 +249,7 @@ namespace Tmm
                         file = fi.Name;
                     }
                 }
+
                 //更新ファイルがる場合、トースト通知
                 if (filelist.Count > 0) {
                     tim[name] = last;
@@ -294,12 +313,14 @@ namespace Tmm
         //無効ファイルのチェック
         static bool IgnoreFileName(string name)
         {
-            switch (System.IO.Path.GetExtension(name).ToLower())
-            {
-                case ".exe": return true;
-                case ".bat": return true;
-                case ".cmd": return true;
-                case ".ps1": return true;
+            var ignore_lst = new List<string>{
+                ".com", ".exe", ".bat", ".cmd", 
+                ".vbs", ".vbe", ".js", ".jse", "wsf", "wsh", 
+                ".pl", ".wpl", ".cpl", ".ps1"
+            };
+            var ext = System.IO.Path.GetExtension(name).ToLower();
+            foreach (var s in ignore_lst) {
+                if (ext == s) return true;
             }
             return false;
         }

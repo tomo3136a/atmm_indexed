@@ -241,7 +241,7 @@ namespace Tmm
         public DirectoryInfo NewIndexed(DirectoryInfo parent, string name)
         {
             if (false == SetSource(name)) {
-                FileNameShow();
+                // FileNameShow();
             }
             string search = GetSearchName();
             foreach (DirectoryInfo di in parent.GetDirectories(search))
