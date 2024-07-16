@@ -246,7 +246,7 @@ namespace Tmm
                         dic[fi.FullName] = name;
                         if (string.Compare(last, dt) >= 0) continue;
                         last = dt;
-                        file = fi.Name;
+                        file = fi.FullName;
                     }
                 }
 
@@ -262,7 +262,7 @@ namespace Tmm
                     string v = "";
                     if (cnt++ > 0) v = cnt.ToString();
                     string path = GetMonitorPath(FileType.DOCUMENT,false,v);
-                    CreateMessage(idx, path, name, s, file, dir);
+                    CreateMessage(path, name, s, file);
                     ToastOut(path);
                 }
             }
@@ -326,9 +326,10 @@ namespace Tmm
         }
 
         //トーストメッセージファイル作成
-        static void CreateMessage(int idx, string path, string msg1, string msg2, string action, string folder)
+        static void CreateMessage(string path, string msg1, string msg2, string file)
         {
-            action = @"file:///" + Path.Combine(folder, action).Replace("\\","/");
+            var folder = Path.GetDirectoryName(file);
+            var action = @"file:///" + file.Replace("\\","/");
             folder = @"file:///" + folder.Replace("\\","/");
             string launch = folder;
             XElement actions = null;
