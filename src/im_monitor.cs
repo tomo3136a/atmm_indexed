@@ -19,7 +19,8 @@ namespace Tmm
             CONFIG,
             DATA,
             MESSAGE,
-            DOCUMENT
+            DOCUMENT,
+            LOG
         };
         public const string monitor_path = @"Indexed";
         public const string monitor_name = @"monitor.txt";
@@ -94,6 +95,7 @@ namespace Tmm
                 case FileType.DATA: ext = "txt"; break;
                 case FileType.MESSAGE: ext = "msg"; break;
                 case FileType.DOCUMENT: ext = "xml"; break;
+                case FileType.LOG: ext = "log"; break;
             }
             name = Path.ChangeExtension(name, ext);
             name = name.Replace(".", opt + ".");
@@ -114,82 +116,67 @@ namespace Tmm
         /// モニタ対象の追加
         public string AddMonitor(string path)
         {
+            var dir = "";
+            var ptn = "*";
+            var mode = "*";
+            var name = "";
+            var fullname = path;
+            var conf = GetMonitorPath(FileType.CONFIG);
+
             //モニタ対象がファイルの場合
             if (File.Exists(path))
             {
                 FileInfo src = new FileInfo(path);
-                var dir = src.DirectoryName;
-                var ptn = "*" + _name + "*" + _ext;
-                var name = Program.AddMonitorDialog(_name, dir, ptn, "設定");
-
-                if ("*" == name)
-                {
-                    var p = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                    p = System.IO.Path.Combine(p, monitor_path);
-                    p = System.IO.Path.Combine(p, Path.ChangeExtension(monitor_name, "ini"));
-                    System.Diagnostics.Process.Start(p);
-                    return null;
-                }
-
-                var conf = GetMonitorPath(FileType.CONFIG);
-                //設定ファイルがある場合、設定ファイルに登録済みなら終了
-                if (File.Exists(conf))
-                {
-                    foreach (var line in File.ReadAllLines(conf))
-                    {
-                        var ss = line.Split('\t');
-                        if (ss.Length < 3) continue;
-                        if (string.Compare(dir, ss[1]) != 0) continue;
-                        if (string.Compare(ptn, ss[2]) == 0) return src.FullName;
-                    }
-                }
-                //設定ファイルにモニタ対象を追加
-                using (var fo = new StreamWriter(conf, true))
-                {
-                    var line = dir + "\t" + ptn;
-                    fo.WriteLineAsync(name + "\t" + line);
-                }
-                return src.FullName;
+                dir = src.DirectoryName;
+                ptn = "*" + _name + "*" + _ext;
+                mode = "";
+                name = Program.AddMonitorDialog(_name, dir, ptn, "設定");
+                fullname = src.FullName;
             }
 
             //モニタ対象がディレクトリの場合
             if (Directory.Exists(path))
             {
                 DirectoryInfo src = new DirectoryInfo(path);
-                var dir = src.FullName;
-                var ptn = "*.*";
-                var conf = GetMonitorPath(FileType.CONFIG);
-                var name = Program.AddMonitorDialog(FileName, dir, ptn, "設定");
+                dir = src.FullName;
+                ptn = "*";
+                mode = "*";
+                name = Program.AddMonitorDialog(FileName, dir, ptn, "設定");
+                fullname = src.FullName;
 
-                if ("*" == name)
-                {
-                    var p = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                    p = System.IO.Path.Combine(p, monitor_path);
-                    p = System.IO.Path.Combine(p, Path.ChangeExtension(monitor_name, "ini"));
-                    System.Diagnostics.Process.Start(p);
-                    return null;
-                }
-
-                //設定ファイルがある場合、設定ファイルに登録済みならなにもせず終了
-                if (File.Exists(conf))
-                {
-                    foreach (var line in File.ReadAllLines(conf))
-                    {
-                        var ss = line.Split('\t');
-                        if (ss.Length < 3) continue;
-                        if (string.Compare(dir, ss[1]) != 0) continue;
-                        if (string.Compare(ptn, ss[2]) == 0) return src.FullName;
-                    }
-                }
-                //設定ファイルにモニタ対象を追加
-                using (var fo = new StreamWriter(conf, true))
-                {
-                    var line = dir + "\t" + ptn;
-                    fo.WriteLineAsync(name + "\t" + line);
-                }
-                return src.FullName;
             }
-            return path;
+
+            if ("*" == name)
+            {
+                var p = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                p = System.IO.Path.Combine(p, monitor_path);
+                p = System.IO.Path.Combine(p, Path.ChangeExtension(monitor_name, "ini"));
+                System.Diagnostics.Process.Start(p);
+                return null;
+            }
+
+            //設定ファイルがある場合、設定ファイルに登録済みならなにもせず終了
+            if (File.Exists(conf))
+            {
+                foreach (var line in File.ReadAllLines(conf))
+                {
+                    var ss = line.Split('\t');
+                    if (ss.Length < 3) continue;
+                    if (string.Compare(dir, ss[1]) != 0) continue;
+                    if (string.Compare(ptn, ss[2]) == 0) return fullname;
+                }
+            }
+
+            //設定ファイルにモニタ対象を追加
+            using (var fo = new StreamWriter(conf, true))
+            {
+
+                var dt = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
+                var line = dir + "\t" + ptn + "\t" + mode + "\t" + dt;
+                fo.WriteLineAsync(name + "\t" + line);
+            }
+
+            return fullname;
         }
 
         ///ファイル変更モニタ実施
@@ -215,25 +202,31 @@ namespace Tmm
                 var name = ss[0];
                 var dir = ss[1];
                 var ptn = ss[2];
+                string mode = "";
+                if (ss.Length > 3) mode = ss[3];
+                string date = "";
+                if (ss.Length > 4) date = ss[4];
                 idx ++;
 
                 //ディレクトリ一覧を取得
                 List<DirectoryInfo> dis = new List<DirectoryInfo>();
                 dis.Add(new DirectoryInfo(dir));
-                for (int i = 0; i < dis.Count; i ++) {
-                    foreach (DirectoryInfo di in dis[i].EnumerateDirectories())
-                    {
-                        if (IsIgnoreName(di.Name)) continue;
-                        dis.Add(di);
+                if (mode == "*")
+                {
+                    for (int i = 0; i < dis.Count; i ++) {
+                        foreach (DirectoryInfo di in dis[i].EnumerateDirectories())
+                        {
+                            if (IsIgnoreName(di.Name)) continue;
+                            dis.Add(di);
+                            if (dis.Count > 100) break;
+                        }
                         if (dis.Count > 100) break;
                     }
-                    if (dis.Count > 100) break;
                 }
 
                 //ディレクトリを調査し更新さえれたファイルリストを取得
                 List<string> filelist = new List<string>();
                 string file = "";
-                string date = "";
                 if (tim.ContainsKey(name)) date = tim[name];
                 string last = date;
                 foreach (DirectoryInfo di in dis) {
