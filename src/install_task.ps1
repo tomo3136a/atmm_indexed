@@ -19,12 +19,13 @@ if ($Clean) {
 # configure
 $ExecutePath = "c:\opt\bin\indexed.exe"
 $WorkingDirectory = "%USERPROFILE%\documents"
+$Interval = 1
 
 # registration task schedule
 $Trigger = @()
 $Trigger += New-ScheduledTaskTrigger `
     -Once -at (Get-Date) `
-    -RepetitionInterval (New-TimeSpan -Minutes 1)
+    -RepetitionInterval (New-TimeSpan -Minutes $Interval)
 
 $Action = New-ScheduledTaskAction `
     -Execute $ExecutePath `
