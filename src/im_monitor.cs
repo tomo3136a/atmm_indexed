@@ -17,6 +17,7 @@ namespace Tmm
     {
         enum FileType {
             CONFIG,
+            IGNORE,
             DATA,
             MESSAGE,
             DOCUMENT,
@@ -24,6 +25,7 @@ namespace Tmm
         };
         public const string monitor_path = @"Indexed";
         public const string monitor_name = @"monitor.txt";
+        public const string ignore_name = @"ignore.txt";
 
         /////////////////////////////////////////////////////////////////////
 
@@ -87,11 +89,12 @@ namespace Tmm
             {
                 Directory.CreateDirectory(path);
             }
-            string name = monitor_name;
-            string ext = Path.GetExtension(name);
+            var name = monitor_name;
+            var ext = Path.GetExtension(name);
             switch (ft)
             {
                 case FileType.CONFIG: ext = "ini"; break;
+                case FileType.IGNORE: name = ignore_name; break;
                 case FileType.DATA: ext = "txt"; break;
                 case FileType.MESSAGE: ext = "msg"; break;
                 case FileType.DOCUMENT: ext = "xml"; break;
@@ -112,6 +115,8 @@ namespace Tmm
             }
             return path;
         }
+
+        /////////////////////////////////////////////////////////////////////
 
         /// モニタ対象の追加
         public string AddMonitor(string path)
@@ -233,6 +238,7 @@ namespace Tmm
                     foreach (FileInfo fi in di.EnumerateFiles(ptn))
                     {
                         if (IsIgnoreName(fi.Name)) continue;
+                        if (IsIgnoreExt(fi.Name)) continue;
                         string dt = fi.LastWriteTime.ToString("yyyy/MM/dd HH:mm:ss");
                         if (string.Compare(date, dt) >= 0) continue;
                         if (! dic.ContainsKey(fi.FullName)) filelist.Add(fi.FullName);
@@ -303,14 +309,38 @@ namespace Tmm
 
         /////////////////////////////////////////////////////////////////////
 
+        static Dictionary<string,string> exts;
+
         //無効ファイルのチェック
-        static bool IgnoreFileName(string name)
+        static bool IsIgnoreExt(string name)
         {
-            var ignore_lst = new List<string>{
-                ".com", ".exe", ".bat", ".cmd", 
-                ".vbs", ".vbe", ".js", ".jse", "wsf", "wsh", 
-                ".pl", ".wpl", ".cpl", ".ps1"
-            };
+            if (exts == null)
+            {
+                exts = new Dictionary<string,string>();
+                string ign = GetMonitorPath(FileType.IGNORE);
+                if (! File.Exists(ign)) return false;
+                foreach (var line in File.ReadAllLines(ign))
+                {
+                    var s = line.Trim();
+                    if (s == "") continue;
+                    if (s == ".") continue;
+                    if (s == "..") continue;
+                    exts.Add(s.ToLower(), s);
+                }
+            }
+
+            var ext = System.IO.Path.GetExtension(name).ToLower();
+            if (exts.ContainsKey(ext)) return true;
+            return false;
+       }
+
+        static List<string> ignore_lst = new List<string>{
+            ".com", ".exe", ".bat", ".cmd", 
+            ".vbs", ".vbe", ".js", ".jse", "wsf", "wsh", 
+            ".pl", ".wpl", ".cpl", ".ps1"
+        };       //無効ファイルのチェック
+        static bool IsIgnoreFileName(string name)
+        {
             var ext = System.IO.Path.GetExtension(name).ToLower();
             foreach (var s in ignore_lst) {
                 if (ext == s) return true;
@@ -326,7 +356,7 @@ namespace Tmm
             folder = @"file:///" + folder.Replace("\\","/");
             string launch = folder;
             XElement actions = null;
-            if (! IgnoreFileName(action))
+            if (! IsIgnoreFileName(action))
             {
                 launch = action;
                 actions = new XElement("actions",
