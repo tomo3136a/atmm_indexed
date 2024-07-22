@@ -254,15 +254,18 @@ namespace Tmm
                     tim[name] = last;
                     update = true;
                     string s = "";
+                    string log = "";
                     foreach(var s1 in filelist)
                     {
                         s += " " + s1.Substring(1 + dir.Length);
+                        log += last + "\t" + dic[s1] + "\t" + s1 + "\r\n";
                     }
                     string v = "";
                     if (cnt++ > 0) v = cnt.ToString();
                     string path = GetMonitorPath(FileType.DOCUMENT,false,v);
                     CreateMessage(path, name, s, file);
                     ToastOut(path);
+                    OutLog(log);
                 }
             }
 
@@ -304,6 +307,16 @@ namespace Tmm
                     fo.WriteLineAsync(k + "\t" + tim[k]);
                     append = true;
                 }
+            }
+        }
+
+        //ログファイル書き出し
+        static void OutLog(string msg)
+        {
+            string path = GetMonitorPath(FileType.LOG);
+            using (var fo = new StreamWriter(path, true))
+            {
+                fo.WriteLineAsync(msg);
             }
         }
 
