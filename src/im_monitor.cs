@@ -1,5 +1,15 @@
 ﻿///ファイル監視
 
+// configファイル(拡張子 .ini)
+// [0]  エントリ名
+// [1]  監視パス
+// [2]  監視ファイルパターン
+// [3]  モード
+//      "": ファイル
+//      "d":ディレクトリ
+// [4]  最終確認日
+
+
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -123,7 +133,7 @@ namespace Tmm
         {
             var dir = "";
             var ptn = "*";
-            var mode = "*";
+            var mode = "";
             var name = "";
             var fullname = path;
             var conf = GetMonitorPath(FileType.CONFIG);
@@ -132,9 +142,9 @@ namespace Tmm
             if (File.Exists(path))
             {
                 FileInfo src = new FileInfo(path);
+                mode = "f";
                 dir = src.DirectoryName;
                 ptn = "*" + _name + "*" + _ext;
-                mode = "";
                 name = Program.AddMonitorDialog(_name, dir, ptn, "設定");
                 fullname = src.FullName;
             }
@@ -143,12 +153,11 @@ namespace Tmm
             if (Directory.Exists(path))
             {
                 DirectoryInfo src = new DirectoryInfo(path);
+                mode = "d";
                 dir = src.FullName;
                 ptn = "*";
-                mode = "*";
                 name = Program.AddMonitorDialog(FileName, dir, ptn, "設定");
                 fullname = src.FullName;
-
             }
 
             if ("*" == name)
@@ -165,6 +174,7 @@ namespace Tmm
             {
                 foreach (var line in File.ReadAllLines(conf))
                 {
+                    if (line[0]=='#') continue;
                     var ss = line.Split('\t');
                     if (ss.Length < 3) continue;
                     if (string.Compare(dir, ss[1]) != 0) continue;
@@ -175,10 +185,9 @@ namespace Tmm
             //設定ファイルにモニタ対象を追加
             using (var fo = new StreamWriter(conf, true))
             {
-
                 var dt = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
-                var line = dir + "\t" + ptn + "\t" + mode + "\t" + dt;
-                fo.WriteLineAsync(name + "\t" + line);
+                var line = dir + "\t" + ptn + "\t" + dt;
+                fo.WriteLineAsync(mode + "\t" + name + "\t" + line);
             }
 
             return fullname;
@@ -202,21 +211,23 @@ namespace Tmm
             //設定ごとに調査
             foreach (var line in File.ReadAllLines(conf))
             {
+                if (line[0]=='#') continue;
                 var ss = line.Split('\t');
                 if (ss.Length < 3) continue;
-                var name = ss[0];
-                var dir = ss[1];
-                var ptn = ss[2];
-                string mode = "";
-                if (ss.Length > 3) mode = ss[3];
+                var mode = ss[0];
+                var name = ss[1];
+                var dir = ss[2];
+                var ptn = ss[3];
                 string date = "";
                 if (ss.Length > 4) date = ss[4];
+                string dst = "";
+                if (ss.Length > 5) dst = ss[5];
                 idx ++;
 
                 //ディレクトリ一覧を取得
                 List<DirectoryInfo> dis = new List<DirectoryInfo>();
                 dis.Add(new DirectoryInfo(dir));
-                if (mode == "*")
+                if (mode == "d")
                 {
                     for (int i = 0; i < dis.Count; i ++) {
                         foreach (DirectoryInfo di in dis[i].EnumerateDirectories())
@@ -229,7 +240,7 @@ namespace Tmm
                     }
                 }
 
-                //ディレクトリを調査し更新さえれたファイルリストを取得
+                //ディレクトリを調査し更新されたファイルリストを取得
                 List<string> filelist = new List<string>();
                 string file = "";
                 if (tim.ContainsKey(name)) date = tim[name];
@@ -249,7 +260,7 @@ namespace Tmm
                     }
                 }
 
-                //更新ファイルがる場合、トースト通知
+                //更新ファイルがある場合、トースト通知
                 if (filelist.Count > 0) {
                     tim[name] = last;
                     update = true;
@@ -262,9 +273,21 @@ namespace Tmm
                     }
                     string v = "";
                     if (cnt++ > 0) v = cnt.ToString();
-                    string path = GetMonitorPath(FileType.DOCUMENT,false,v);
-                    CreateMessage(path, name, s, file);
-                    ToastOut(path);
+                    if (dst=="") {
+                        string path = GetMonitorPath(FileType.DOCUMENT,false,v);
+                        CreateMessage(path, name, s, file);
+                        ToastOut(path);
+                    }
+                    else {
+                        FileInfo si = new FileInfo(file);
+                        FileInfo di = new FileInfo(Path.Combine(dst, si.Name));
+                        if (di.Exists) {
+                            long ticks = di.LastWriteTime.Ticks;
+                            string index = ItemManager.DateTimeFormat(ticks);
+                            FileInfo bi = Indexed(new FileInfo(di.FullName), index, 0, 0);
+                        }
+                        si.CopyTo(di.FullName);
+                    }
                     OutLog(log);
                 }
             }
@@ -287,6 +310,7 @@ namespace Tmm
             {
                 foreach (var line in File.ReadAllLines(data))
                 {
+                    if (line[0]=='#') continue;
                     var ss = line.Split('\t');
                     if (ss.Length < 2) continue;
                     tim.Add(ss[0], ss[1]);

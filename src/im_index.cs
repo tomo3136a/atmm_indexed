@@ -149,17 +149,17 @@ namespace Tmm
                     }
                 }
             }
-            string s = BuildName();
+            string s = Path.Combine(src.DirectoryName,BuildName());
             FileInfo dst = new FileInfo(s);
             if (dst.Name != src.Name)
             {
                 if (move)
                 {
-                    src.MoveTo(s);
+                    src.MoveTo(dst.FullName);
                 }
                 else
                 {
-                    src.CopyTo(s);
+                    src.CopyTo(dst.FullName);
                 }
             }
             else
