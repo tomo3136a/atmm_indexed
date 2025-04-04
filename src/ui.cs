@@ -300,7 +300,7 @@ namespace Tmm
         public static string TaggingDialog(string tag, string src)
         {
             string title = "indexed";
-            string text = "タグを入れてください。";
+            string text = "タグを入力してください。";
             InputDialog dlg = new InputDialog(text, title, true);
             dlg.SrcName = "変更前: " + src;
             dlg.DstName = " ";
@@ -333,7 +333,7 @@ namespace Tmm
         public static string CommentDialog(string comment, string src)
         {
             string title = "indexed";
-            string text = "コメントを入れてください。";
+            string text = "コメントを入力してください。";
             InputDialog dlg = new InputDialog(text, title, false);
             dlg.SrcName = "変更前: " + src;
             dlg.DstName = " ";
@@ -444,9 +444,9 @@ namespace Tmm
         public static string AddMonitorDialog(string name, string src, string ptn, string btn="")
         {
             string title = "ファイル監視";
-            string text = "項目名を入れてください。";
+            string text = "項目名を入力してください。";
             InputDialog dlg = new InputDialog(text, title, false, btn);
-            dlg.SrcName = "フォルダ: " + src;
+            dlg.SrcName = "フォルダ： " + src;
             dlg.DstName = "パターン： " + ptn;
 
             string res = null;

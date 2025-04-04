@@ -160,11 +160,12 @@ namespace Tmm
                 fullname = src.FullName;
             }
 
+            if ("" == name) return null;
             if ("*" == name)
             {
                 var p = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
                 p = System.IO.Path.Combine(p, monitor_path);
-                p = System.IO.Path.Combine(p, Path.ChangeExtension(monitor_name, "ini"));
+                //p = System.IO.Path.Combine(p, Path.ChangeExtension(monitor_name, "ini"));
                 System.Diagnostics.Process.Start(p);
                 return null;
             }
@@ -176,9 +177,9 @@ namespace Tmm
                 {
                     if (line[0]=='#') continue;
                     var ss = line.Split('\t');
-                    if (ss.Length < 3) continue;
-                    if (string.Compare(dir, ss[1]) != 0) continue;
-                    if (string.Compare(ptn, ss[2]) == 0) return fullname;
+                    if (ss.Length < 4) continue;
+                    if (string.Compare(dir, ss[2]) != 0) continue;
+                    if (string.Compare(ptn, ss[3]) == 0) return fullname;
                 }
             }
 
@@ -266,19 +267,34 @@ namespace Tmm
                     update = true;
                     string s = "";
                     string log = "";
+                    string lnk = "<html><body>";
                     foreach(var s1 in filelist)
                     {
                         s += " " + s1.Substring(1 + dir.Length);
                         log += last + "\t" + dic[s1] + "\t" + s1 + "\r\n";
+                        lnk += "<a href=\"" + s1 + "\">" + s1.Substring(1 + dir.Length) + "</a><br/>\r\n";
                     }
+                    lnk += "</body></html>";
                     string v = "";
                     if (cnt++ > 0) v = cnt.ToString();
-                    if (dst=="") {
+                    if (dst=="")
+                    {
                         string path = GetMonitorPath(FileType.DOCUMENT,false,v);
-                        CreateMessage(path, name, s, file);
+                        if (filelist.Count > 1)
+                        {
+                            file = GetMonitorPath(FileType.LOG);
+                            file = Path.GetDirectoryName(file);
+                            file = Path.Combine(file, name + ".htm");
+                            CreateMessage(path, name, s, file);
+                        }
+                        else
+                        {
+                            CreateMessage(path, name, s, file);
+                        }
                         ToastOut(path);
                     }
-                    else {
+                    else
+                    {
                         FileInfo si = new FileInfo(file);
                         FileInfo di = new FileInfo(Path.Combine(dst, si.Name));
                         if (di.Exists) {
@@ -288,6 +304,7 @@ namespace Tmm
                         }
                         si.CopyTo(di.FullName);
                     }
+                    OutLnk(name, lnk);
                     OutLog(log);
                 }
             }
@@ -331,6 +348,18 @@ namespace Tmm
                     fo.WriteLineAsync(k + "\t" + tim[k]);
                     append = true;
                 }
+            }
+        }
+
+        //リンクファイル書き出し
+        static void OutLnk(string name, string msg)
+        {
+            string path = GetMonitorPath(FileType.LOG);
+            path = Path.GetDirectoryName(path);
+            path = Path.Combine(path, name + ".htm");
+            using (var fo = new StreamWriter(path, false))
+            {
+                fo.WriteLineAsync(msg);
             }
         }
 
