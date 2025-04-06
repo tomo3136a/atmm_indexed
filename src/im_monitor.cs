@@ -265,16 +265,17 @@ namespace Tmm
                 if (filelist.Count > 0) {
                     tim[name] = last;
                     update = true;
-                    string s = "";
-                    string log = "";
-                    string lnk = "<html><body>";
-                    foreach(var s1 in filelist)
+
+                    //ファイルリスト作成
+                    string msg = "";
+                    foreach(var s in filelist)
                     {
-                        s += " " + s1.Substring(1 + dir.Length);
-                        log += last + "\t" + dic[s1] + "\t" + s1 + "\r\n";
-                        lnk += "<a href=\"" + s1 + "\">" + s1.Substring(1 + dir.Length) + "</a><br/>\r\n";
+                        msg += " " + s.Substring(1 + dir.Length);
                     }
-                    lnk += "</body></html>";
+
+                    //リンクリスト作成
+                    OutLnk(name, dir, filelist);
+
                     string v = "";
                     if (cnt++ > 0) v = cnt.ToString();
                     if (dst=="")
@@ -285,11 +286,11 @@ namespace Tmm
                             file = GetMonitorPath(FileType.LOG);
                             file = Path.GetDirectoryName(file);
                             file = Path.Combine(file, name + ".htm");
-                            CreateMessage(path, name, s, file);
+                            CreateMessage(path, name, msg, file, dir);
                         }
                         else
                         {
-                            CreateMessage(path, name, s, file);
+                            CreateMessage(path, name, msg, file);
                         }
                         ToastOut(path);
                     }
@@ -304,8 +305,14 @@ namespace Tmm
                         }
                         si.CopyTo(di.FullName);
                     }
-                    OutLnk(name, lnk);
-                    OutLog(log);
+
+                    //ログ作成
+                    string log = "";
+                    foreach(var s in filelist)
+                    {
+                        log += last + "\t" + dic[s] + "\t" + s + "\r\n";
+                    }
+                    OutLog(name, log);
                 }
             }
 
@@ -352,11 +359,20 @@ namespace Tmm
         }
 
         //リンクファイル書き出し
-        static void OutLnk(string name, string msg)
+        static void OutLnk(string name, string dir, List<string> filelist)
         {
+            var msg = "<html><body>\r\n";
+            msg += "<a href=\"&lt;folder&gt;\">" + dir + "</a><br/>\r\n";
+            foreach(var s in filelist)
+            {
+                msg += "<a href=\"" + s + "\">" + s.Substring(1 + dir.Length) + "</a><br/>\r\n";
+            }
+            msg += "</body></html>";
+
+            string dt = DateTime.Now.ToString("yyyyMMddHHmm");
             string path = GetMonitorPath(FileType.LOG);
             path = Path.GetDirectoryName(path);
-            path = Path.Combine(path, name + ".htm");
+            path = Path.Combine(path, name + "_" + dt+ ".htm");
             using (var fo = new StreamWriter(path, false))
             {
                 fo.WriteLineAsync(msg);
@@ -364,7 +380,7 @@ namespace Tmm
         }
 
         //ログファイル書き出し
-        static void OutLog(string msg)
+        static void OutLog(string name, string msg)
         {
             string path = GetMonitorPath(FileType.LOG);
             using (var fo = new StreamWriter(path, true))
@@ -415,14 +431,14 @@ namespace Tmm
         }
 
         //トーストメッセージファイル作成
-        static void CreateMessage(string path, string msg1, string msg2, string file)
+        static void CreateMessage(string path, string msg1, string msg2, string file, string folder = "")
         {
-            var folder = Path.GetDirectoryName(file);
-            var action = @"file:///" + file.Replace("\\","/");
-            folder = @"file:///" + folder.Replace("\\","/");
-            string launch = folder;
+            var action = new Uri(file).ToString();
+            if (folder == "") folder = Path.GetDirectoryName(file);
+            var url = (new Uri(folder)).ToString();
+            string launch = url;
             XElement actions = null;
-            if (! IsIgnoreFileName(action))
+            if (! IsIgnoreFileName(file))
             {
                 launch = action;
                 actions = new XElement("actions",
@@ -433,7 +449,7 @@ namespace Tmm
                     ),
                     new XElement("action",
                         new XAttribute("activationType", "protocol"),
-                        new XAttribute("arguments", folder),
+                        new XAttribute("arguments", url),
                         new XAttribute("content", "フォルダ")
                     )
                 );
