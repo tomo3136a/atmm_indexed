@@ -18,10 +18,11 @@ namespace Tmm
             regkey.SetValue("", "");
             regkey.Close();
             regkey = cu.CreateSubKey(@"Software\Classes\atmm\tag");
-            regkey.SetValue("", "abc");
+            regkey.SetValue("", "abcd");
             regkey.SetValue("a", "参考");
             regkey.SetValue("b", "編集中");
-            regkey.SetValue("c", "破棄");
+            regkey.SetValue("c", "済み");
+            regkey.SetValue("d", "破棄");
             regkey.Close();
             regkey = cu.CreateSubKey(@"Software\Classes\atmm\tag\recent");
             regkey.SetValue("", "");
@@ -33,7 +34,7 @@ namespace Tmm
             regkey.SetValue("", "");
             regkey.Close();
 
-            regkey  = cu.CreateSubKey(@"Software\Classes\*\shell\at_2_snapshot");
+            regkey = cu.CreateSubKey(@"Software\Classes\*\shell\at_2_snapshot");
             regkey.SetValue("MUIVerb", "スナップショット(&H)");
             regkey.SetValue("Description", "日付を付けたファイルを作成します。");
             regkey.SetValue("AppliesTo", "NOT system.filename:~\"*_20??????*\"");
@@ -42,7 +43,7 @@ namespace Tmm
             regkey.SetValue("", "\"" + path + "\" -s \"%V\"");
             regkey.Close();
 
-            regkey  = cu.CreateSubKey(@"Software\Classes\*\shell\at_2_snapshot2");
+            regkey = cu.CreateSubKey(@"Software\Classes\*\shell\at_2_snapshot2");
             regkey.SetValue("MUIVerb", "日付削除(&H)");
             regkey.SetValue("Description", "ファイルから日付を削除します。");
             regkey.SetValue("AppliesTo", "system.filename:~\"*_20??????*\"");
