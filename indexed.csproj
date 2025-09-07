@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <!-- <TargetFramework>net481-windows</TargetFramework> -->
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <TargetFramework>net481-windows</TargetFramework>
+    <!-- <TargetFramework>net9.0-windows</TargetFramework> -->
     <!-- <Nullable>enable</Nullable> -->
     <UseWindowsForms>true</UseWindowsForms>
     <!-- <ImplicitUsings>enable</ImplicitUsings> -->
