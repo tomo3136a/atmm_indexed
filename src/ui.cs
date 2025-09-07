@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using System.ComponentModel;
 
 namespace Tmm
 {
@@ -27,7 +28,7 @@ namespace Tmm
             ComboBox comboBox = new ComboBox();
             ListBox listBox = new ListBox();
 
-            public InputDialog(string text, string caption, bool bList=false, string sConfig=null)
+            public InputDialog(string text, string caption, bool bList = false, string sConfig = null)
             {
                 int width = 400;
                 int height = 190;
@@ -99,14 +100,14 @@ namespace Tmm
 
                 srcLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
                 srcLabel.Left = 10;
-                srcLabel.Top = h - 7*10 + 5 - accept.Height;
+                srcLabel.Top = h - 7 * 10 + 5 - accept.Height;
                 srcLabel.Text = "src:";
                 srcLabel.AutoSize = true;
                 srcLabel.MaximumSize = new Size(width - 20, 0);
 
                 dstLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
                 dstLabel.Left = 10;
-                dstLabel.Top = h - 5*10 + 10 - accept.Height;
+                dstLabel.Top = h - 5 * 10 + 10 - accept.Height;
                 dstLabel.Text = "dst:";
                 dstLabel.AutoSize = true;
                 dstLabel.MaximumSize = new Size(width - 20, 0);
@@ -119,7 +120,7 @@ namespace Tmm
 
                 if (bList)
                 {
-                    listBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom 
+                    listBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom
                         | AnchorStyles.Left | AnchorStyles.Right;
                     listBox.Width = w - 10 * 2;
                     listBox.Height = hList;
@@ -165,6 +166,7 @@ namespace Tmm
 
             /////////////////////////////////////////////////////////////////////
 
+            [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
             public string Value
             {
                 get
@@ -177,6 +179,7 @@ namespace Tmm
                 }
             }
 
+            [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
             public string SrcName
             {
                 set
@@ -184,6 +187,8 @@ namespace Tmm
                     srcLabel.Text = value;
                 }
             }
+
+            [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
             public string DstName
             {
                 set
@@ -206,6 +211,7 @@ namespace Tmm
                 }
             }
 
+            [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
             public int ModeIndex
             {
                 set
@@ -225,6 +231,9 @@ namespace Tmm
             public void AddText(string s)
             {
                 textBox.Items.Add(s);
+                if (s == "") return;
+                if (listBox.Items.Contains(s)) return;
+                listBox.Items.Add(s);
             }
 
             public void AddListItem(string s)
@@ -242,9 +251,9 @@ namespace Tmm
                 var flg = false;
                 foreach (var v in Config.GetValues(kw + @"\recent"))
                 {
-                    if (v != val) flg= true;
+                    if (v != val) flg = true;
                 }
-                if (! flg)
+                if (!flg)
                 {
                     if (val != null)
                     {
@@ -269,6 +278,7 @@ namespace Tmm
                 comboBox.Items.Add(s);
             }
 
+            [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
             public string FormatType
             {
                 get
@@ -281,6 +291,7 @@ namespace Tmm
                 }
             }
 
+            [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
             public int FormatTypeIndex
             {
                 set
@@ -317,7 +328,7 @@ namespace Tmm
             }
             catch
             {
-                MessageBox.Show("operation error. TaggingDialog", 
+                MessageBox.Show("operation error. TaggingDialog",
                     AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             return res;
@@ -350,7 +361,7 @@ namespace Tmm
             }
             catch
             {
-                MessageBox.Show("operation error.", 
+                MessageBox.Show("operation error.",
                     AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             return res;
@@ -441,7 +452,7 @@ namespace Tmm
         /// <param name="name"></param>
         /// <param name="dt"></param>
         /// <returns></returns>
-        public static string AddMonitorDialog(string name, string src, string ptn, string btn="")
+        public static string AddMonitorDialog(string name, string src, string ptn, string btn = "")
         {
             string title = "ファイル監視";
             string text = "項目名を入力してください。";
@@ -466,7 +477,7 @@ namespace Tmm
             }
             catch
             {
-                MessageBox.Show("operation error.", 
+                MessageBox.Show("operation error.",
                     AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             return res;

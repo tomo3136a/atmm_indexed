@@ -10,7 +10,8 @@ namespace Tmm
     {
         public const string hash_name = @"digest.sum";
 
-        static readonly HashAlgorithm hashProvider = new MD5CryptoServiceProvider();
+        // static readonly HashAlgorithm hashProvider = new MD5CryptoServiceProvider();
+        static readonly HashAlgorithm hashProvider = MD5.Create();
 
         public static string GetFileHash(string path, string algorithm = "MD5")
         {
@@ -19,17 +20,17 @@ namespace Tmm
                 var provider = hashProvider;
                 switch (algorithm)
                 {
-                    case "SHA1": provider = new SHA1CryptoServiceProvider(); break;
-                    case "SHA256": provider = new SHA256CryptoServiceProvider(); break;
-                    case "SHA384": provider = new SHA384CryptoServiceProvider(); break;
-                    case "SHA512": provider = new SHA512CryptoServiceProvider(); break;
+                    case "SHA1": provider = SHA1.Create(); break;
+                    case "SHA256": provider = SHA256.Create(); break;
+                    case "SHA384": provider = SHA384.Create(); break;
+                    case "SHA512": provider = SHA512.Create(); break;
                 }
                 var bs = provider.ComputeHash(fs);
                 return BitConverter.ToString(bs).ToLower().Replace("-", "");
             }
         }
 
-        public static void WriteHashFile(string path, string name, string hash, bool bAppend=false)
+        public static void WriteHashFile(string path, string name, string hash, bool bAppend = false)
         {
             var hash_path = path;
             if (Directory.Exists(hash_path))
@@ -42,7 +43,7 @@ namespace Tmm
             }
         }
 
-        public static Dictionary<string,string> ReadHashFile(string path)
+        public static Dictionary<string, string> ReadHashFile(string path)
         {
             var hash_path = path;
             if (Directory.Exists(hash_path))
@@ -83,7 +84,7 @@ namespace Tmm
             return algorithm;
         }
 
-        public static string GetAlgorithm(Dictionary<string,string> col)
+        public static string GetAlgorithm(Dictionary<string, string> col)
         {
             var kve = col.GetEnumerator();
             kve.MoveNext();
@@ -108,7 +109,7 @@ namespace Tmm
             }
             foreach (var fi in src.EnumerateFiles())
             {
-                if (!"._@".Contains(""+fi.Name[0]))
+                if (!"._@".Contains("" + fi.Name[0]))
                 {
                     var hash = GetFileHash(fi.FullName);
                     using (var fo = new StreamWriter(hash_file.FullName, true))
