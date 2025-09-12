@@ -129,6 +129,7 @@ namespace Tmm
                     listBox.AutoSize = true;
                     listBox.Visible = true;
                     listBox.SelectedIndexChanged += new EventHandler(on_changed);
+                    listBox.DoubleClick += new EventHandler(on_ok_close);
                 }
 
                 this.Controls.Add(textBox);
@@ -151,6 +152,12 @@ namespace Tmm
                 this.AcceptButton = accept;
                 this.CancelButton = cancel;
                 //this.Focus();
+            }
+
+            void on_ok_close(Object sender, EventArgs e)
+            {
+                this.DialogResult = DialogResult.OK;
+                this.Close();
             }
 
             void on_close(Object sender, EventArgs e)
