@@ -1,7 +1,8 @@
 ﻿#builder
 #
+param($OutputPath = "./bin", [switch]$pass)
+
 $AppName = "indexed.exe"
-$OutputPath = "./bin"
 
 $Path = "src/*.cs"
 $ReferencedAssemblies = "System.Drawing", "System.Windows.Forms", `
@@ -23,10 +24,5 @@ Add-Type -Path $Path -OutputType WindowsApplication `
   -OutputAssembly $OutputAssembly `
   -ReferencedAssemblies $ReferencedAssemblies
 
-Copy-Item -Force lib/install.cmd $OutputPath
-Copy-Item -Force lib/uninstall.cmd $OutputPath
-Copy-Item -Force lib/install_task.cmd $OutputPath
-Copy-Item -Force lib/install_task.ps1 $OutputPath
-
 Write-Host "build completed." -ForegroundColor Yellow
-$host.UI.RawUI.ReadKey() | Out-Null
+if ($pass) { $host.UI.RawUI.ReadKey() | Out-Null }
