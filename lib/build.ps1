@@ -26,4 +26,4 @@ Add-Type -Path $Path -OutputType WindowsApplication `
   -ReferencedAssemblies $ReferencedAssemblies
 
 Write-Host "build completed." -ForegroundColor Yellow
-if ($pass) $host.UI.RawUI.ReadKey() | Out-Null
+if ($pass) { $host.UI.RawUI.ReadKey() | Out-Null }
