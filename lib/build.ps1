@@ -1,5 +1,7 @@
 ﻿#builder
 #
+param($OutputPath="./bin",[switch]$pass)
+
 $AppName = "indexed.exe"
 $OutputPath = "./bin"
 
