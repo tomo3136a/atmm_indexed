@@ -12,7 +12,7 @@ if ($Clean) {
         }
         catch {}
     }
-    $host.UI.RawUI.ReadKey() | Out-Null
+    if (-not $Pass) { $host.UI.RawUI.ReadKey() | Out-Null }
     Exit
 }
 
