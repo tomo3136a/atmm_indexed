@@ -1,4 +1,4 @@
-﻿param($Name = "ファイル監視", [switch]$Clean = $false)
+﻿param($Name = "ファイル監視", [switch]$Clean, [switch]$Pass)
 
 # remove resistered task
 if ($Clean) {
@@ -56,4 +56,4 @@ Get-ScheduledTaskInfo -TaskName $Name
 
 # end of resister task
 Write-Host "Registered ScheduleTask completed." -ForegroundColor Yellow
-$host.UI.RawUI.ReadKey() | Out-Null
+if (-not $Pass) { $host.UI.RawUI.ReadKey() | Out-Null }
